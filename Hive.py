@@ -1,8 +1,5 @@
 import pygame
-import random
-import math
 
-from Config import *
 from Color import *
 
 
