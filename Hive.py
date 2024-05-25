@@ -23,7 +23,7 @@ class Hive(pygame.sprite.Sprite):
     # def draw(self, screen):  # Zeichne den Bienenstock
     #     pygame.draw.circle(screen, BLACK, (self.x, self.y), 25)
 
-    def deliver(self, food_amount, sugar_amount):  # Nahrung wird an Bienenstock übergeben
+    def deposit(self, food_amount, sugar_amount):  # Nahrung wird an Bienenstock übergeben
         self.food_count = self.food_count + (food_amount * sugar_amount)
 
     def update(self):

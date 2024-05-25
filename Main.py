@@ -30,6 +30,7 @@ def main():
     bees = bees + [Bee(1, hivePosX, hivePosY) for _ in range(BEES_EMPLOYED)]  # Erzeugt employed Bienen (Status = 1)
     bees = bees + [Bee(2, hivePosX, hivePosY) for _ in range(BEES_ONLOOKER)]  # Erzeugt Onlooker Bienen (Status = 2)
 
+    # Erzeuge Futterquellen
     foodsource_group = pygame.sprite.Group()
     foods = [
         Foodsource(random.randint(MIN_UNITS, MAX_UNITS), random.randint(MIN_SUGAR, MAX_SUGAR), MIN_RANGE_FOOD_TO_HIVE,
@@ -37,7 +38,7 @@ def main():
     foodsource_group.add(foods)
     total_food_amount = 0
 
-    # Alle Futterquellen zusammenzählen
+    # Alle Units der Futterquellen zusammenzählen
     for foodsource in foodsource_group:
         total_food_amount = total_food_amount + (
                 foodsource.units * foodsource.sugar)
@@ -88,7 +89,7 @@ def main():
                         onlooker.change_occupation(1)  # Biene wird employed
                         bee.amount_employed = bee.amount_employed + 1  # Zähler für maximale Anzahl Bienen rekrutierbar
             if bee.occupation == 4:  # Wenn Biene im Stock ist
-                hive.deliver(bee.capacity,
+                hive.deposit(bee.capacity,
                              bee.dance_information[2])  # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
                 bee.deliver(hive.scout_bees, hive.dance_bees)  # Nahrung von Biene entfernen
             # Abfrage ob eine Futterquelle im Sichtbereich der Biene liegt
