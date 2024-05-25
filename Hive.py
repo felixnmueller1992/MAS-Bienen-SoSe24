@@ -14,11 +14,11 @@ class Hive(pygame.sprite.Sprite):
         self.dance_bees = 0  # Anzahl tanzende Bienen
 
         self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
-        self.image.fill((0, 0, 0, 0))
+        self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
         pygame.draw.circle(self.image, BLACK, (25, 25), 25)
 
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+        self.rect.center = (self.x, self.y)
 
     # def draw(self, screen):  # Zeichne den Bienenstock
     #     pygame.draw.circle(screen, BLACK, (self.x, self.y), 25)
