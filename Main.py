@@ -30,15 +30,17 @@ def main():
     bees = bees + [Bee(1, hivePosX, hivePosY) for _ in range(BEES_EMPLOYED)]  # Erzeugt employed Bienen (Status = 1)
     bees = bees + [Bee(2, hivePosX, hivePosY) for _ in range(BEES_ONLOOKER)]  # Erzeugt Onlooker Bienen (Status = 2)
 
+    foodsource_group = pygame.sprite.Group()
     foods = [
         Foodsource(random.randint(MIN_UNITS, MAX_UNITS), random.randint(MIN_SUGAR, MAX_SUGAR), MIN_RANGE_FOOD_TO_HIVE,
                    hivePosX, hivePosY) for _ in range(FOOD_COUNT)]
-    total_food_amount = 0  # Gesamte verfügbare Futter Einheiten
+    foodsource_group.add(foods)
+    total_food_amount = 0
 
     # Alle Futterquellen zusammenzählen
-    for foodsource in foods:
+    for foodsource in foodsource_group:
         total_food_amount = total_food_amount + (
-                foodsource.units * foodsource.sugar)  # Gesamte Futtereinheiten zusammenzählen
+                foodsource.units * foodsource.sugar)
 
     # Hauptschleife
     running = True
@@ -49,16 +51,22 @@ def main():
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
             running = False
 
-        screen.fill(WHITE)  # Hintergrund zeichnen
-        hive_group.draw(screen)  # Bienenstock auf Karte zeichnen
+        # Hintergrund zeichnen
+        screen.fill(WHITE)
+
+        # Bienenstock auf Karte zeichnen
+        hive_group.draw(screen)
         hive_group.update()
 
+        # Futterquellen auf Karte zeichnen
+        foodsource_group.draw(screen)
+        foodsource_group.update()
         # Alle Futterquellen updaten
-        for foodsource in foods:
-            foodsource.draw(screen)
+        # for foodsource in foods:
+        #     foodsource.draw(screen)
 
         # TODO Bienen werden nicht mehr zurückgesetzt! Nur temporär!
-        # hive.scout_bees = 0  # Anzahl Scout Bienen intialisieren
+        # hive.scout_bees = 0  # Anzahl Scout Bienen initialisieren
         # hive.dance_bees = 0  # Anzahl Tanzende Bienen initialisieren
         # for bee in bees:  # Alle Bienen zählen
         #     if bee.occupation == 0:  # Biene ist Scout Biene
@@ -74,7 +82,7 @@ def main():
                     if onlooker.occupation == 2 and bee.amount_employed < min(bee.dance_information[2],
                                                                               bee.dance_information[
                                                                                   3]):  # Biene ist Onlooker und es
-                        # dürfen so viele Bienen rekuriert werden, wie der Zuckergehalt der
+                        # dürfen so viele Bienen rekrutiert werden, wie der Zuckergehalt der
                         onlooker.dance_information = bee.dance_information  # Übergabe Tanz Informationen von
                         # tanzende Biene zu Onlooker Biene
                         onlooker.change_occupation(1)  # Biene wird employed
