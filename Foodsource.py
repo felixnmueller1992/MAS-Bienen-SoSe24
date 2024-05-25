@@ -10,9 +10,10 @@ class Foodsource(pygame.sprite.Sprite):
     def __init__(self, units, sugar, distance_to_hive, hive_x, hive_y):
         super().__init__()
         self.x = random.randint(50, SCREEN_WIDTH - 50)  # Zufällige Position X
-        if self.x > hive_x - distance_to_hive and self.x < hive_x + distance_to_hive:  # Futterquelle ist zu nah am Bienenstock
+        if self.x > hive_x - distance_to_hive and self.x < hive_x + distance_to_hive:  # Futterquelle ist zu nah am
+            # Bienenstock
             self.x = self.x + 2 * distance_to_hive  # Futterquelle vom Bienenstock wegschieben
-        self.y = random.randint(50, SCREEN_HEIGHT - 50)  # Zufällige Posiition Y
+        self.y = random.randint(50, SCREEN_HEIGHT - 50)  # Zufällige Position Y
         self.units = units  # Anzahl Futtereinheiten für diese Futterquelle
         self.sugar = sugar  # Anzahl Zucker für diese Futterquelle
         self.label_font = pygame.font.SysFont("Arial", 12)
