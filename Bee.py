@@ -45,16 +45,21 @@ class Bee(pygame.sprite.Sprite):
 
     def check_foodsources(self, foodsources):
         for food in foodsources:
-            if food.units >= 1 and self.x > food.x - (food.units + BEE_VISION) and self.x < food.x + (
-                    food.units + BEE_VISION) and self.y > food.y - (food.units + BEE_VISION) and self.y < food.y + (
-                    food.units + BEE_VISION) and self.capacity < BEE_MAX_CAPACITY and self.occupation is not Occupation.EMPLOYED:
-                self.orientation = math.atan(
-                    (food.y - self.y) / (food.x - (self.x))) * 180 / math.pi  # Gefundene Futterquelle anfliegen
-            if self.x > food.x - (food.units + 3) and self.x < food.x + (food.units + 3) and self.y > food.y - (
-                    food.units + 3) and self.y < food.y + (food.units + 3) and self.capacity < BEE_MAX_CAPACITY:
-                food_harvested = food.harvest(BEE_MAX_CAPACITY - self.capacity)  # Futter entnehmen aus Futterquelle
-                self.harvest(food_harvested, food.x, food.y, food.sugar,
-                            food.units, food)  # Futter und Tanzinformation an Biene übergeben
+            if (food.units >= 1
+                    and food.x - (food.units + BEE_VISION) < self.x < food.x + (food.units + BEE_VISION)
+                    and food.y - (food.units + BEE_VISION) < self.y < food.y + (food.units + BEE_VISION)
+                    and self.capacity < BEE_MAX_CAPACITY
+                    and self.occupation is not Occupation.EMPLOYED):
+                # Gefundene Futterquelle anfliegen
+                self.orientation = math.atan((food.y - self.y) / (food.x - self.x)) * 180 / math.pi
+
+            if (food.x - (food.units + 3) < self.x < food.x + (food.units + 3)
+                    and food.y - (food.units + 3) < self.y < food.y + (food.units + 3)
+                    and self.capacity < BEE_MAX_CAPACITY):
+                # Futter entnehmen aus Futterquelle
+                food_harvested = food.harvest(BEE_MAX_CAPACITY - self.capacity)
+                # Futter und Tanzinformation an Biene übergeben
+                self.harvest(food_harvested, food.x, food.y, food.sugar, food.units, food)
 
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
