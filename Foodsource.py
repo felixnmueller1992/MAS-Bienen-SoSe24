@@ -50,7 +50,6 @@ class Foodsource(pygame.sprite.Sprite):
             self.kill()
 
     def harvest(self, x):  # Biene erntet Futter von Futterquelle
-        print(self.units)
         if x > self.units:  # Verbleibendes Futter ist kleiner als Bienenkapazität
             retval = self.units  # Es wird nur das verbleibende Futter entnommen
         else:
