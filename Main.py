@@ -1,13 +1,11 @@
-import pygame
 import random
-import math
 
-from Config import *
+import pygame
+
 from Color import *
-
-from Hive import Hive
-from Bee import Bee, Occupation
+from Config import *
 from Foodsource import Foodsource
+from Hive import Hive
 
 
 # Hauptfunktion
