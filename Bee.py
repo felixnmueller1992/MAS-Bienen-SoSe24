@@ -105,14 +105,13 @@ class Bee(pygame.sprite.Sprite):
                             self.hive.x - (self.x))) * 180 / math.pi  # Winkel zum Bienenstock berechnen
 
             case Occupation.RETURNING:  # Biene fliegt zurück zum Bienenstock
-                self.orientation = math.atan(
-                    (self.hive.y - self.y) / (
-                            self.hive.x - (self.x))) * 180 / math.pi  # Winkel zum Bienenstock berechnen
-                # if pygame.sprite.spritecollide(self, self.hive, False):
-                #     self.x = self.hive.x
-                #     self.y = self.hive.y
-                #     self.change_occupation(Occupation.IN_HIVE)  # Biene ist im Stock
-                #     self.steps = 0  # Schritt Counter zurücksetzen
+                # Winkel zum Bienenstock berechnen
+                self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
+                if pygame.sprite.collide_rect(self, self.hive):
+                    self.x = self.hive.x
+                    self.y = self.hive.y
+                    self.change_occupation(Occupation.IN_HIVE)  # Biene ist im Stock
+                    self.steps = 0  # Schritt Counter zurücksetzen
 
             case Occupation.IN_HIVE:  # Biene befindet sich im Bienenstock
                 # Winkel zum Bienenstock berechnen
@@ -140,14 +139,6 @@ class Bee(pygame.sprite.Sprite):
                 if self.dance_counter == MAX_DANCE_COUNTER:  # Ende des Schwänzeltanz
                     self.change_occupation(Occupation.ONLOOKER)  # Biene wird nach dem Tanzen zur Onlooker Biene
                     self.amount_employed = 0  # Rücksetzen Zähler max Anzahl Bienen zu rekrutieren
-
-        # Biene im Bienenstock einfangen
-        if (self.x > self.hive.x - 10 and self.x < self.hive.x + 10 and self.y > self.hive.y - 10
-                and self.y < self.hive.y + 10 and self.occupation == Occupation.RETURNING):
-            self.x = self.hive.x
-            self.y = self.hive.y
-            self.change_occupation(Occupation.IN_HIVE)  # Biene ist im Stock
-            self.steps = 0  # Schritt Counter zurücksetzen
 
     def update_image(self):
         self.image.fill((0, 0, 0, 0))
