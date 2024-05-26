@@ -46,7 +46,7 @@ class Foodsource(pygame.sprite.Sprite):
 
     def update(self):
         self.update_labels()
-        if self.units == 0:
+        if self.units <= 0:
             self.kill()
 
     def harvest(self, x):  # Biene erntet Futter von Futterquelle
@@ -54,7 +54,7 @@ class Foodsource(pygame.sprite.Sprite):
             retval = self.units  # Es wird nur das verbleibende Futter entnommen
         else:
             retval = x  # Maximales Futter wird entnommen
-        self.units = self.units - x  # Futtermenge von Futterquelle abziehen
+        self.units = self.units - retval  # Futtermenge von Futterquelle abziehen
         if self.units < 0:  # Negative Zahlen begrenzen
             self.units = 0
         return retval  # Tatsächlich gesammelte Futtermenge als Rückgabewert
