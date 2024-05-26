@@ -155,16 +155,15 @@ class Bee(pygame.sprite.Sprite):
         self.dance_information = food_x, food_y, food_sugar, food_units_remaining  # Tanz Informationen von der
         # Futterquelle an die Biene übergeben
         self.foodsource = food
-        if not self.foodsource.alive():
-            self.change_occupation(Occupation.RETURNING)
+        if not self.foodsource.alive() or food_harvested < 1:
+            self.change_occupation(
+                Occupation.SCOUT)  # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
+            self.steps = MAX_STEP_COUNTER_BEES - 150  # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die
+            # Umgebung absucht
         if self.capacity >= BEE_MAX_CAPACITY:
             self.capacity = BEE_MAX_CAPACITY  # Futtermenge begrenzen
             self.change_occupation(Occupation.RETURNING)  # Biene ist voll und muss in den Bienenstock fliegen
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
-        if food_harvested < 1:  # Futterquelle war leer, es konnte nichts entnommen werden
-            self.change_occupation(Occupation.SCOUT)  # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
-            self.steps = MAX_STEP_COUNTER_BEES - 150  # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die
-            # Umgebung absucht
 
     def deliver(self, scout_bees, dancing_bees):  # Futter abgeben
         if self.capacity != 0:  # Biene hat Futter dabei
