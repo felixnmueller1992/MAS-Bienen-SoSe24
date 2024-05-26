@@ -62,44 +62,11 @@ def main():
 
         # Bienen auf Karte zeichnen
         bee_group.draw(screen)
-        bee_group.update()
+        bee_group.update(foodsource_group)
 
         # Futterquellen auf Karte zeichnen
         foodsource_group.draw(screen)
         foodsource_group.update()
-
-        for bee in bee_group:  # Alle Bienen updaten
-            # bee.update()
-            # bee.draw(screen)
-            if bee.occupation == Occupation.DANCER:  # Biene ist tanzende Biene
-                for onlooker in bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
-                    if onlooker.occupation == Occupation.ONLOOKER and bee.amount_employed < min(
-                            bee.dance_information[2],
-                            bee.dance_information[
-                                3]):  # Biene ist Onlooker und es
-                        # dürfen so viele Bienen rekrutiert werden, wie der Zuckergehalt der
-                        onlooker.dance_information = bee.dance_information  # Übergabe Tanz Informationen von
-                        # tanzende Biene zu Onlooker Biene
-                        onlooker.foodsource = bee.foodsource
-                        onlooker.change_occupation(Occupation.EMPLOYED)  # Biene wird employed
-                        bee.amount_employed = bee.amount_employed + 1  # Zähler für maximale Anzahl Bienen rekrutierbar
-            if bee.occupation == Occupation.IN_HIVE:  # Wenn Biene im Stock ist
-                hive.deposit(bee.capacity,
-                             bee.dance_information[2])  # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
-                bee.deliver(hive.scout_bees, hive.dance_bees)  # Nahrung von Biene entfernen
-
-            # Abfrage, ob eine Futterquelle im Sichtbereich der Biene liegt
-            for food in foods:
-                if food.units >= 1 and bee.x > food.x - (food.units + BEE_VISION) and bee.x < food.x + (
-                        food.units + BEE_VISION) and bee.y > food.y - (food.units + BEE_VISION) and bee.y < food.y + (
-                        food.units + BEE_VISION) and bee.capacity < BEE_MAX_CAPACITY and bee.occupation != 1:
-                    bee.orientation = math.atan(
-                        (food.y - bee.y) / (food.x - (bee.x))) * 180 / math.pi  # Gefundene Futterquelle anfliegen
-                if bee.x > food.x - (food.units + 3) and bee.x < food.x + (food.units + 3) and bee.y > food.y - (
-                        food.units + 3) and bee.y < food.y + (food.units + 3) and bee.capacity < BEE_MAX_CAPACITY:
-                    food_harvested = food.harvest(BEE_MAX_CAPACITY - bee.capacity)  # Futter entnehmen aus Futterquelle
-                    bee.harvest(food_harvested, food.x, food.y, food.sugar,
-                                food.units, food)  # Futter und Tanzinformation an Biene übergeben
 
         legende_zeichnen(screen, hive, total_food_amount)
 
