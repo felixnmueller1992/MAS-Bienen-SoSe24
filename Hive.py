@@ -18,9 +18,11 @@ class Hive(pygame.sprite.Sprite):
 
         self.algorithm = Algorithm.ABC
 
-        self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
+        self.size = 75
+        self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
-        pygame.draw.circle(self.image, BLACK, (25, 25), 25)
+        self.radius = self.size / 2
+        pygame.draw.circle(self.image, BLACK, (self.radius, self.radius), self.radius)
 
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
@@ -49,8 +51,9 @@ class Hive(pygame.sprite.Sprite):
         self.food_count = self.food_count + (food_amount * sugar_amount)
 
     def update(self):
-        print(f'Bees:{len(self.bees)}, SCOUT:{len(self.scout_bees)}, EMPLOYED:{len(self.employed_bees)}'
-              f', ONLOOKER:{len(self.onlooker_bees)}, DANCERS:{len(self.dance_bees)}')
+        pass
+        # print(f'Bees:{len(self.bees)}, SCOUT:{len(self.scout_bees)}, EMPLOYED:{len(self.employed_bees)}'
+        #       f', ONLOOKER:{len(self.onlooker_bees)}, DANCERS:{len(self.dance_bees)}')
 
 # Enum für Algorithmus
 class Algorithm(Enum):

@@ -30,7 +30,9 @@ class Bee(pygame.sprite.Sprite):
         self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
 
         # Image
-        self.image = pygame.Surface((6, 6), pygame.SRCALPHA)
+        self.size = 6
+        self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
+        self.radius = self.size / 2
 
         # Rect
         self.rect = self.image.get_rect()
@@ -107,7 +109,7 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.RETURNING:  # Biene fliegt zurück zum Bienenstock
                 # Winkel zum Bienenstock berechnen
                 self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
-                if pygame.sprite.collide_rect(self, self.hive):
+                if pygame.sprite.collide_circle(self, self.hive):
                     self.x = self.hive.x
                     self.y = self.hive.y
                     self.change_occupation(Occupation.IN_HIVE)  # Biene ist im Stock
@@ -144,15 +146,15 @@ class Bee(pygame.sprite.Sprite):
         self.image.fill((0, 0, 0, 0))
         self.rect.center = (self.x, self.y)
         if self.occupation == Occupation.SCOUT:  # Biene ist Scout
-            pygame.draw.circle(self.image, COLOR_BEE_SCOUT, (3, 3), 3)
+            pygame.draw.circle(self.image, COLOR_BEE_SCOUT, (self.radius, self.radius), self.radius)
         elif self.occupation == Occupation.EMPLOYED:  # Biene ist Employed
-            pygame.draw.circle(self.image, COLOR_BEE_EMPLOYED, (3, 3), 3)
+            pygame.draw.circle(self.image, COLOR_BEE_EMPLOYED, (self.radius, self.radius), self.radius)
         elif self.occupation == Occupation.ONLOOKER:  # Biene ist Onlooker
-            pygame.draw.circle(self.image, COLOR_BEE_ONLOOKER, (3, 3), 2)
+            pygame.draw.circle(self.image, COLOR_BEE_ONLOOKER, (self.radius, self.radius), 2)
         elif self.occupation == Occupation.RETURNING:  # Biene fliegt zurück zum Bienenstock
-            pygame.draw.circle(self.image, YELLOW, (3, 3), 4)
+            pygame.draw.circle(self.image, YELLOW, (self.radius, self.radius), 4)
         elif self.occupation == Occupation.DANCER:  # Biene tanzt
-            pygame.draw.circle(self.image, COLOR_BEE_DANCER, (3, 3), 6)
+            pygame.draw.circle(self.image, COLOR_BEE_DANCER, (self.radius, self.radius), 6)
 
     def change_occupation(self, occupation):
         match self.occupation:
