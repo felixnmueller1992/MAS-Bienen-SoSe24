@@ -46,8 +46,8 @@ class Foodsource(pygame.sprite.Sprite):
 
     def update(self):
         self.update_labels()
-        if self.units <= 0:
-            self.kill()
+        #if self.units <= 0:
+        #    self.kill()
 
     def harvest(self, x):  # Biene erntet Futter von Futterquelle
         if x > self.units:  # Verbleibendes Futter ist kleiner als Bienenkapazität
