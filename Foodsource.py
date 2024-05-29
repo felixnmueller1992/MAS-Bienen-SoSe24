@@ -17,7 +17,11 @@ class Foodsource(pygame.sprite.Sprite):
         self.units = units  # Anzahl Futtereinheiten für diese Futterquelle
         self.sugar = sugar  # Anzahl Zucker für diese Futterquelle
         self.label_font = pygame.font.SysFont("Arial", 12)
+        self.update_labels()
 
+    # Futterquelle und Labels zeichnen
+    def update_labels(self):
+        #size = self.image.get_width()
         size = self.units * 2
         self.image = pygame.Surface((size, size), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
@@ -26,20 +30,12 @@ class Foodsource(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
 
-        self.update_labels()
-
-    # Futterquelle und Labels zeichnen
-    def update_labels(self):
-        size = self.image.get_width()
-        self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
-        pygame.draw.circle(self.image, GREEN, (size // 2, size // 2), self.units)
-
-        label_text_food = "Food value: " + str(self.units)
+        label_text_food = "FV: " + str(self.units)
         label_surface_food = self.label_font.render(label_text_food, True, BLACK)
         food_rect = label_surface_food.get_rect(center=(size // 2, size // 2 - 10))  # Zentriert Label
         self.image.blit(label_surface_food, food_rect)
 
-        label_text_sugar = "Sugar value: " + str(self.sugar)
+        label_text_sugar = "SV: " + str(self.sugar)
         label_surface_sugar = self.label_font.render(label_text_sugar, True, BLACK)
         sugar_rect = label_surface_sugar.get_rect(center=(size // 2, size // 2 + 10))  # Zentriert Label
         self.image.blit(label_surface_sugar, sugar_rect)

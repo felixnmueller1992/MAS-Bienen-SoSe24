@@ -56,8 +56,10 @@ class Bee(pygame.sprite.Sprite):
                     # Gefundene Futterquelle anfliegen
                     self.orientation = math.atan((food.y - self.y) / (food.x - self.x)) * 180 / math.pi
 
-                if (food.x - (food.units + 3) < self.x < food.x + (food.units + 3)
-                        and food.y - (food.units + 3) < self.y < food.y + (food.units + 3)):
+                # (food.x - (food.units + 3) < self.x < food.x + (food.units + 3)
+                #        and food.y - (food.units + 3) < self.y < food.y + (food.units + 3)):
+
+                if pygame.sprite.collide_circle(self, food): #Kollision Biene mit Futterquelle erkennen
                     # Futter entnehmen aus
                     food_harvested = food.harvest(BEE_MAX_CAPACITY - self.capacity)
                     # Futter und Tanzinformation an Biene übergeben
