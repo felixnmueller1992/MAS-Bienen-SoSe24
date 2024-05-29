@@ -16,6 +16,7 @@ class Foodsource(pygame.sprite.Sprite):
         self.y = random.randint(50, SCREEN_HEIGHT - 50)  # Zufällige Position Y
         self.units = units  # Anzahl Futtereinheiten für diese Futterquelle
         self.sugar = sugar  # Anzahl Zucker für diese Futterquelle
+        self.radius = self.units
         self.label_font = pygame.font.SysFont("Arial", 12)
         self.update_labels()
 
@@ -23,9 +24,10 @@ class Foodsource(pygame.sprite.Sprite):
     def update_labels(self):
         #size = self.image.get_width()
         size = self.units * 2
+        self.radius = self.units
         self.image = pygame.Surface((size, size), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
-        pygame.draw.circle(self.image, GREEN, (size // 2, size // 2), self.units)
+        pygame.draw.circle(self.image, GREEN, (size // 2, size // 2), self.radius)
 
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
