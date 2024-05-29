@@ -1,7 +1,5 @@
 import random
-import pygame
 
-from Color import *
 from Config import *
 from Foodsource import Foodsource
 from Hive import Hive
