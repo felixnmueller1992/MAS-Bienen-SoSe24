@@ -22,7 +22,6 @@ class Foodsource(pygame.sprite.Sprite):
 
     # Futterquelle und Labels zeichnen
     def update_labels(self):
-        #size = self.image.get_width()
         size = self.units * 2
         self.radius = self.units
         self.image = pygame.Surface((size, size), pygame.SRCALPHA)
@@ -44,8 +43,9 @@ class Foodsource(pygame.sprite.Sprite):
 
     def update(self):
         self.update_labels()
-        #if self.units <= 0:
-        #    self.kill()
+        if self.units <= 0:
+            self.kill()
+            self.radius = 10
 
     def harvest(self, x):  # Biene erntet Futter von Futterquelle
         if x > self.units:  # Verbleibendes Futter ist kleiner als Bienenkapazität
