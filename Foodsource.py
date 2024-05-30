@@ -9,6 +9,8 @@ from Color import *
 class Foodsource(pygame.sprite.Sprite):
     def __init__(self, units, sugar, distance_to_hive, hive_x, hive_y):
         super().__init__()
+        self.rect = None
+        self.image = None
         self.x = random.randint(50, SCREEN_WIDTH - 50)  # Zufällige Position X
         if self.x > hive_x - distance_to_hive and self.x < hive_x + distance_to_hive:  # Futterquelle ist zu nah am
             # Bienenstock
