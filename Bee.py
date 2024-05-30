@@ -16,8 +16,7 @@ class Bee(pygame.sprite.Sprite):
         self.y = hive.y  # Startposition Y im Bienenstock
         self.hive = hive
         self.occupation = None  # Occupation muss initialisiert werden
-        self.change_occupation(occupation)  # Status der Biene: 0 = Scout , 1 = employed , 2 = onlooker , 3 = to_home ,
-        # 4 = Biene ist im Stock
+        self.change_occupation(occupation)
         self.speed = random.randint(MIN_VELOCITY_BEE, MAX_VELOCITY_BEE)  # Zufällige Geschwindigkeit
         self.orientation = random.uniform(0.0, 360.0)  # Zufällige Start-Orientierung
         self.capacity = 0  # Aktuelle tragende Nahrungsanzahl der Biene
@@ -40,6 +39,12 @@ class Bee(pygame.sprite.Sprite):
 
         self.update_image()
 
+    def reset_dance_information(self):
+        self.amount_employed = 0
+        self.dance_counter = 0
+        self.dance_information = 0, 0, 0, 0
+        self.foodsource = None
+
     def update(self, foodsources):
         self.check_foodsources(foodsources)
         self.update_movement()
@@ -50,18 +55,20 @@ class Bee(pygame.sprite.Sprite):
                 and self.capacity < BEE_MAX_CAPACITY):
             for food in foodsources:
                 if (food.units >= 1
-                        and food.x - (food.units + BEE_VISION) < self.x < food.x + (food.units + BEE_VISION)
-                        and food.y - (food.units + BEE_VISION) < self.y < food.y + (food.units + BEE_VISION)
+                        and self.bee_vision_collide(food)
                         and self.occupation is not Occupation.EMPLOYED):
                     # Gefundene Futterquelle anfliegen
                     self.orientation = math.atan((food.y - self.y) / (food.x - self.x)) * 180 / math.pi
 
-                if (food.x - (food.units + 3) < self.x < food.x + (food.units + 3)
-                        and food.y - (food.units + 3) < self.y < food.y + (food.units + 3)):
-                    # Futter entnehmen aus
-                    food_harvested = food.harvest(BEE_MAX_CAPACITY - self.capacity)
+                # Kollision Biene mit Futterquelle erkennen
+                if pygame.sprite.collide_circle(self, food):
                     # Futter und Tanzinformation an Biene übergeben
-                    self.harvest(food_harvested, food.x, food.y, food.sugar, food.units, food)
+                    self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
+
+    # Methode zur Prüfung ob ein Objekt im Sichtfeld der Biene liegt
+    def bee_vision_collide(self, circle):
+        distance = math.sqrt((self.x - circle.x) ** 2 + (self.y - circle.y) ** 2)
+        return distance < (self.radius + circle.radius) + BEE_VISION
 
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
@@ -102,6 +109,12 @@ class Bee(pygame.sprite.Sprite):
                 self.orientation = (
                         math.atan((self.dance_information[1] - self.y) / (self.dance_information[0] - self.x))
                         * 180 / math.pi)
+                if not self.foodsource.alive() and pygame.sprite.collide_circle(self, self.foodsource):
+                    # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
+                    self.change_occupation(Occupation.SCOUT)
+                    # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die Umgebung absucht
+                    self.steps = MAX_STEP_COUNTER_BEES - 150
+                    self.reset_dance_information()
 
             case Occupation.ONLOOKER:
                 # Winkel zum Bienenstock berechnen
@@ -120,14 +133,13 @@ class Bee(pygame.sprite.Sprite):
                 # Winkel zum Bienenstock berechnen
                 self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
                 # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
-                self.hive.deposit(self.capacity, self.dance_information[2])
                 self.deliver()  # Nahrung von Biene entfernen
 
             case Occupation.DANCER:
                 # Winkel zum Bienenstock berechnen
                 self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
                 for onlooker in self.hive.onlooker_bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
-                    if self.amount_employed < min(self.dance_information[2],self.dance_information[3]):
+                    if self.amount_employed < min(self.dance_information[2], self.dance_information[3]):
                         # Biene ist Onlooker und es dürfen so viele Bienen rekrutiert werden, wie der Zuckergehalt der
                         onlooker.dance_information = self.dance_information
                         onlooker.foodsource = self.foodsource
@@ -139,7 +151,8 @@ class Bee(pygame.sprite.Sprite):
                 # Ende des Schwänzeltanz
                 if self.dance_counter == MAX_DANCE_COUNTER:
                     self.change_occupation(Occupation.ONLOOKER)
-                    self.amount_employed = 0
+
+                    self.reset_dance_information()
 
     def update_image(self):
         self.image.fill((0, 0, 0, 0))
@@ -176,37 +189,34 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.DANCER:
                 self.hive.dance_bees.add(self)
 
-    def harvest(self, food_harvested, food_x, food_y, food_sugar, food_units_remaining, food):  # Futter ernten
+    def harvest(self, food_harvested, food):  # Futter ernten
         self.capacity = self.capacity + food_harvested  # Anzahl Futter erhöhen
-        self.dance_information = food_x, food_y, food_sugar, food_units_remaining  # Tanz Informationen von der
-        # Futterquelle an die Biene übergeben
+        self.dance_information = food.x, food.y, food.sugar, food.units
         self.foodsource = food
-        if not self.foodsource.alive() or food_harvested < 1:
-            self.change_occupation(
-                Occupation.SCOUT)  # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
-            self.steps = MAX_STEP_COUNTER_BEES - 150  # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die
-            # Umgebung absucht
-        elif self.capacity >= BEE_MAX_CAPACITY:
+        if self.capacity >= BEE_MAX_CAPACITY:
             self.capacity = BEE_MAX_CAPACITY  # Futtermenge begrenzen
             self.change_occupation(Occupation.RETURNING)  # Biene ist voll und muss in den Bienenstock fliegen
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 
     def deliver(self):  # Futter abgeben
         if self.capacity != 0:  # Biene hat Futter dabei
+            self.hive.deposit(self.capacity, self.dance_information[2])
             self.speed = self.speed + REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit erhöhen wenn Biene kein Futter mehr
             # trägt
         self.capacity = 0  # Nahrung wird von Biene entfernt
 
         # TODO Hier Formel zur Auswertung der Güte der Futterquelle -> Soll Biene Tanzen oder nicht? #####
-        if len(self.hive.dance_bees) < MAX_BEES_DANCER:  # noch keine Biene tanzt und Zuckergehalt hoch genug
+        if self.dance_information[3] > 0 and len(
+                self.hive.dance_bees) < MAX_BEES_DANCER:  # noch keine Biene tanzt und Zuckergehalt hoch genug
             # self.dance_information[2] <- Zuckergehalt, self.dance_information[3] = restliche Nahrungsmenge
             self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
             self.dance_counter = 0  # Tanz beginnt von vorne
             self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
         else:  # Biene tanzt nicht, dann
-            if len(self.hive.scout_bees) >= MAX_BEES_SCOUT:  # Wenn maximale Anzal an Scout Bienen erreicht, wird die Biene zur
-                # Onlooker Biene
-                self.change_occupation(Occupation.ONLOOKER)  # Biene wird Biene Onlooker
+            self.reset_dance_information()
+            # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
+            if len(self.hive.scout_bees) >= MAX_BEES_SCOUT:
+                self.change_occupation(Occupation.ONLOOKER)
             else:
                 self.change_occupation(Occupation.SCOUT)  # Ansonsten wird Biene wird Scout Biene
                 self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
