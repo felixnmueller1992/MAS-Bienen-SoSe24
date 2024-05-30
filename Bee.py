@@ -123,7 +123,6 @@ class Bee(pygame.sprite.Sprite):
                 # Winkel zum Bienenstock berechnen
                 self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
                 # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
-                self.hive.deposit(self.capacity, self.dance_information[2])
                 self.deliver()  # Nahrung von Biene entfernen
 
             case Occupation.DANCER:
@@ -191,6 +190,7 @@ class Bee(pygame.sprite.Sprite):
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 
     def deliver(self):  # Futter abgeben
+        self.hive.deposit(self.capacity, self.dance_information[2])
         if self.capacity != 0:  # Biene hat Futter dabei
             self.speed = self.speed + REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit erhöhen wenn Biene kein Futter mehr
             # trägt
