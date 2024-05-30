@@ -58,10 +58,8 @@ class Bee(pygame.sprite.Sprite):
 
                 # Kollision Biene mit Futterquelle erkennen
                 if pygame.sprite.collide_circle(self, food):
-                    # Futter entnehmen aus Futterquelle
-                    food_harvested = food.harvest(BEE_MAX_CAPACITY - self.capacity)
                     # Futter und Tanzinformation an Biene übergeben
-                    self.harvest(food_harvested, food.x, food.y, food.sugar, food.units, food)
+                    self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
 
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
@@ -183,9 +181,9 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.DANCER:
                 self.hive.dance_bees.add(self)
 
-    def harvest(self, food_harvested, food_x, food_y, food_sugar, food_units_remaining, food):  # Futter ernten
+    def harvest(self, food_harvested, food):  # Futter ernten
         self.capacity = self.capacity + food_harvested  # Anzahl Futter erhöhen
-        self.dance_information = food_x, food_y, food_sugar, food_units_remaining
+        self.dance_information = food.x, food.y, food.sugar, food.units
         self.foodsource = food
         if self.capacity >= BEE_MAX_CAPACITY:
             self.capacity = BEE_MAX_CAPACITY  # Futtermenge begrenzen
