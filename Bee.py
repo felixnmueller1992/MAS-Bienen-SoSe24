@@ -58,7 +58,7 @@ class Bee(pygame.sprite.Sprite):
                         and self.bee_vision_collide(food)
                         and self.occupation is not Occupation.EMPLOYED):
                     # Gefundene Futterquelle anfliegen
-                    self.orientation = math.atan((food.y - self.y) / (food.x - self.x)) * 180 / math.pi
+                    self.orientate_towards(food)
 
                 # Kollision Biene mit Futterquelle erkennen
                 if pygame.sprite.collide_circle(self, food):
@@ -69,6 +69,10 @@ class Bee(pygame.sprite.Sprite):
     def bee_vision_collide(self, circle):
         distance = math.sqrt((self.x - circle.x) ** 2 + (self.y - circle.y) ** 2)
         return distance < (self.radius + circle.radius) + BEE_VISION
+
+    def orientate_towards(self, sprite):
+        self.orientation = math.atan((sprite.y - self.y) / (sprite.x - self.x)) * 180 / math.pi
+
 
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
@@ -106,9 +110,7 @@ class Bee(pygame.sprite.Sprite):
 
             case Occupation.EMPLOYED:
                 # Winkel zur Futterquelle berechnen
-                self.orientation = (
-                        math.atan((self.dance_information[1] - self.y) / (self.dance_information[0] - self.x))
-                        * 180 / math.pi)
+                self.orientate_towards(self.foodsource)
                 if not self.foodsource.alive() and pygame.sprite.collide_circle(self, self.foodsource):
                     # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
                     self.change_occupation(Occupation.SCOUT)
@@ -118,11 +120,11 @@ class Bee(pygame.sprite.Sprite):
 
             case Occupation.ONLOOKER:
                 # Winkel zum Bienenstock berechnen
-                self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
+                self.orientate_towards(self.hive)
 
             case Occupation.RETURNING:
                 # Winkel zum Bienenstock berechnen
-                self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
+                self.orientate_towards(self.hive)
                 if pygame.sprite.collide_circle(self, self.hive):
                     self.x = self.hive.x
                     self.y = self.hive.y
@@ -131,13 +133,13 @@ class Bee(pygame.sprite.Sprite):
 
             case Occupation.IN_HIVE:
                 # Winkel zum Bienenstock berechnen
-                self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
+                self.orientate_towards(self.hive)
                 # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
                 self.deliver()  # Nahrung von Biene entfernen
 
             case Occupation.DANCER:
                 # Winkel zum Bienenstock berechnen
-                self.orientation = math.atan((self.hive.y - self.y) / (self.hive.x - self.x)) * 180 / math.pi
+                self.orientate_towards(self.hive)
                 for onlooker in self.hive.onlooker_bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
                     if self.amount_employed < min(self.dance_information[2], self.dance_information[3]):
                         # Biene ist Onlooker und es dürfen so viele Bienen rekrutiert werden, wie der Zuckergehalt der
