@@ -57,8 +57,8 @@ class Bee(pygame.sprite.Sprite):
                 and self.capacity < BEE_MAX_CAPACITY):
             for food in foodsources:
                 if (food.units >= 1
-                        and self.bee_vision_collide(food)
-                        and self.occupation is not Occupation.EMPLOYED):
+                        and self.occupation is not Occupation.EMPLOYED
+                        and self.bee_vision_collide(food)):
                     # Gefundene Futterquelle anfliegen
                     self.orientate_towards(food)
 
@@ -67,12 +67,15 @@ class Bee(pygame.sprite.Sprite):
                     # Futter und Tanzinformation an Biene übergeben
                     self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
 
-    # Methode zur Prüfung ob ein Objekt im Sichtfeld der Biene liegt
+    # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
         distance = math.sqrt((self.x - circle.x) ** 2 + (self.y - circle.y) ** 2)
         return distance < (self.radius + circle.radius) + BEE_VISION
 
     def orientate_towards(self, sprite):
+        self.orientation = math.atan2(sprite.y - self.y, sprite.x - self.x)
+
+    def orientate_loosely_towards(self, sprite):
         self.orientation = math.atan((sprite.y - self.y) / (sprite.x - self.x)) * 180 / math.pi
 
     def update_occupations(self):
@@ -130,16 +133,16 @@ class Bee(pygame.sprite.Sprite):
                 self.orientate_towards(self.foodsource)
             case Occupation.ONLOOKER:
                 # Winkel zum Bienenstock berechnen
-                self.orientate_towards(self.hive)
+                self.orientate_loosely_towards(self.hive)
             case Occupation.RETURNING:
                 # Winkel zum Bienenstock berechnen
                 self.orientate_towards(self.hive)
             case Occupation.IN_HIVE:
                 # Winkel zum Bienenstock berechnen
-                self.orientate_towards(self.hive)
+                self.orientate_loosely_towards(self.hive)
             case Occupation.DANCER:
                 # Winkel zum Bienenstock berechnen
-                self.orientate_towards(self.hive)
+                self.orientate_loosely_towards(self.hive)
 
         # Kontrollieren ob Biene über Simulationsgrenzen fliegt und umkehren lassen
         if self.x <= 0:
