@@ -2,13 +2,13 @@
 BEES_SCOUT = 10  # Anzahl Scout Bienen im System zum Start
 BEES_EMPLOYED = 0  # Anzahl Employed Bienen im System zum Start
 BEES_ONLOOKER = 200  # Anzahl Onlooker Bienen im System zum Start
-MAX_BEES_SCOUT = 5  # Anzahl maximale Scout Bienen im System
+MAX_BEES_SCOUT = 10  # Anzahl maximale Scout Bienen im System
 MAX_BEES_DANCER = 5  # Anzahl maximale tanzende Bienen
 FOOD_COUNT = 10  # Anzahl Futterquellen im System
 MAX_SUGAR = 7  # Maximale Anzahl Zuckereinheiten pro Futterquelle
 MIN_SUGAR = 1  # Minimale Anzahl an Zuckereinheiten pro Futterquelle
-MAX_UNITS = 100  # Maximale Futterkapazität einer Futterquelle
-MIN_UNITS = 15  # Minimale Futterkapazität einer Futterquelle
+MAX_UNITS = 75  # Maximale Futterkapazität einer Futterquelle
+MIN_UNITS = 20  # Minimale Futterkapazität einer Futterquelle
 MAX_TIME = 1800000  # 86.400 # Anzahl Zeit der Simulation
 MIN_RANGE_FOOD_TO_HIVE = 150  # Wie weit müssen Futterquellen mindestens vom Bienenstock entfernt sein
 

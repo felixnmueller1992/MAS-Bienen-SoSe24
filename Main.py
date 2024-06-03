@@ -56,20 +56,21 @@ def main():
         hive_group.draw(screen)
         hive_group.update()
 
-        # Bienen auf Karte zeichnen
-        bee_group.draw(screen)
-        bee_group.update(foodsource_group)
-
         # Futterquellen auf Karte zeichnen
         foodsource_group.draw(screen)
         foodsource_group.update()
 
-        legende_zeichnen(screen, hive, total_food_amount) #Legende auf die Map zeichnen
+        # Bienen auf Karte zeichnen
+        bee_group.draw(screen)
+        bee_group.update(foodsource_group)
+
+        legende_zeichnen(screen, hive, total_food_amount)  # Legende auf die Map zeichnen
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
