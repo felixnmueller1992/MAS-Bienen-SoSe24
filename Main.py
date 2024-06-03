@@ -10,11 +10,14 @@ from Legende import *
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    sim_surf = pygame.surface.Surface((SIMULATION_WIDTH, SCREEN_HEIGHT))
+
     pygame.display.set_caption("Bienenstock Simulation")
     clock = pygame.time.Clock()
 
     # Initialisiere alle Objekte für Simulation
-    hivePosX = SCREEN_WIDTH / random.randint(2, 4)
+    hivePosX = SIMULATION_WIDTH / random.randint(2, 4)
     hivePosY = SCREEN_HEIGHT / random.randint(2, 4)
 
     # Erzeuge Bienenstock
@@ -50,22 +53,25 @@ def main():
             running = False
 
         # Hintergrund zeichnen
-        screen.fill(WHITE)
+        screen.fill(GREY)
+
+        sim_surf.fill(GREY)
 
         # Bienenstock auf Karte zeichnen
-        hive_group.draw(screen)
+        hive_group.draw(sim_surf)
         hive_group.update()
 
         # Futterquellen auf Karte zeichnen
-        foodsource_group.draw(screen)
+        foodsource_group.draw(sim_surf)
         foodsource_group.update()
 
         # Bienen auf Karte zeichnen
-        bee_group.draw(screen)
+        bee_group.draw(sim_surf)
         bee_group.update(foodsource_group)
 
         legende_zeichnen(screen, hive, total_food_amount)  # Legende auf die Map zeichnen
 
+        screen.blit(sim_surf, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
         pygame.display.flip()
         clock.tick(60)
 

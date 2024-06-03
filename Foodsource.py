@@ -11,7 +11,7 @@ class Foodsource(pygame.sprite.Sprite):
         super().__init__()
         self.rect = None
         self.image = None
-        self.x = random.randint(50, SCREEN_WIDTH - 50)  # Zufällige Position X
+        self.x = random.randint(50, SIMULATION_WIDTH - 50)  # Zufällige Position X
         if self.x > hive_x - distance_to_hive and self.x < hive_x + distance_to_hive:  # Futterquelle ist zu nah am
             # Bienenstock
             self.x = self.x + 2 * distance_to_hive  # Futterquelle vom Bienenstock wegschieben

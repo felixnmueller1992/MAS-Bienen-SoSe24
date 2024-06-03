@@ -148,9 +148,9 @@ class Bee(pygame.sprite.Sprite):
         if self.x <= 0:
             self.orientation = self.orientation * random.randint(2, 5)  # Zufällige neue Orientierung
             self.x = 1
-        if self.x >= SCREEN_WIDTH:
+        if self.x >= SIMULATION_WIDTH:
             self.orientation = self.orientation * random.randint(2, 5)  # Zufällige neue Orientierung
-            self.x = SCREEN_WIDTH - 1
+            self.x = SIMULATION_WIDTH - 1
         if self.y <= 0:
             self.orientation = self.orientation * random.randint(2, 5)  # Zufällige neue Orientierung
             self.y = 1
