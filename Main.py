@@ -11,7 +11,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    sim_surf = pygame.surface.Surface((SIMULATION_WIDTH, SCREEN_HEIGHT))
+    simulation_screen = pygame.surface.Surface((SIMULATION_WIDTH, SCREEN_HEIGHT))
 
     pygame.display.set_caption("Bienenstock Simulation")
     clock = pygame.time.Clock()
@@ -53,25 +53,27 @@ def main():
             running = False
 
         # Hintergrund zeichnen
-        screen.fill(GREY)
-
-        sim_surf.fill(GREY)
+        screen.fill(WHITE)
+        simulation_screen.fill(GREY)
 
         # Bienenstock auf Karte zeichnen
-        hive_group.draw(sim_surf)
+        hive_group.draw(simulation_screen)
         hive_group.update()
 
         # Futterquellen auf Karte zeichnen
-        foodsource_group.draw(sim_surf)
+        foodsource_group.draw(simulation_screen)
         foodsource_group.update()
 
         # Bienen auf Karte zeichnen
-        bee_group.draw(sim_surf)
+        bee_group.draw(simulation_screen)
         bee_group.update(foodsource_group)
 
-        legende_zeichnen(screen, hive, total_food_amount)  # Legende auf die Map zeichnen
+        # Legende auf die Map zeichnen
+        legende_zeichnen(screen, hive_group, total_food_amount)
 
-        screen.blit(sim_surf, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
+        # Simulation auf den darunterliegenden Screen zeichnen
+        screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
+
         pygame.display.flip()
         clock.tick(60)
 
