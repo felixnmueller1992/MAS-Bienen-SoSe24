@@ -25,5 +25,8 @@ MAX_BEES_TO_EMPLOY = 5  # Anzahl an Bienen die von einer Biene rekrutiert werden
 MAX_DANCE_COUNTER = 100  # Dauer des Schwänzeltanz
 
 # Bildschirmgröße
-SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1600
+
+SIMULATION_WIDTH = 1400
+
