@@ -27,6 +27,7 @@ class Bee(pygame.sprite.Sprite):
         self.steps = 0  # Anzahl Schritte bevor die Biene zum Bienenstock zurückkehren muss (auch ohne Futter)
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
         self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
+        self.success = 0 # Counter wie oft Biene erfolgreich Futter gesammelt hat
 
         # Image
         self.size = 6
@@ -66,6 +67,7 @@ class Bee(pygame.sprite.Sprite):
                 if pygame.sprite.collide_circle(self, food):
                     # Futter und Tanzinformation an Biene übergeben
                     self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
+                    self.success = self.success + 1
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
