@@ -224,15 +224,15 @@ class Bee(pygame.sprite.Sprite):
 
         # TODO Hier Formel zur Auswertung der Güte der Futterquelle -> Soll Biene Tanzen oder nicht? #####
         if self.success == 1: # Biene war an Futterquelle erstes Mal erfolgreich
-            self.dance_probability == 0.4
-        elif self.success == 2:
-            self.dance_probability == 0.6
+            self.dance_probability = 0.4
+        elif self.success == 2: # Biene war an Futterquelle zweites Mal erfolgreich
+            self.dance_probability = 0.6
         elif self.success == 3:
-            self.dance_probability == 0.8
+            self.dance_probability = 0.8 # Biene war an Futterquelle drittes Mal erfolgreich
 
 
         if self.dance_information[3] > 0 and len(
-                self.hive.dance_bees) < MAX_BEES_DANCER:  # noch keine Biene tanzt und Zuckergehalt hoch genug
+                self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random(): # noch keine Biene tanzt, Zuckergehalt hoch genug und Wahrscheinlichkeit hoch genug
             # self.dance_information[2] <- Zuckergehalt, self.dance_information[3] = restliche Nahrungsmenge
             self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
             self.dance_counter = 0  # Tanz beginnt von vorne
