@@ -28,6 +28,7 @@ class Bee(pygame.sprite.Sprite):
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
         self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
         self.success = 0 # Counter wie oft Biene erfolgreich Futter gesammelt hat
+        self.dance_probability =  0 # Tanzwahrscheinlichkeit
 
         # Image
         self.size = 6
@@ -222,6 +223,14 @@ class Bee(pygame.sprite.Sprite):
         self.capacity = 0  # Nahrung wird von Biene entfernt
 
         # TODO Hier Formel zur Auswertung der Güte der Futterquelle -> Soll Biene Tanzen oder nicht? #####
+        if self.success == 1: # Biene war an Futterquelle erstes Mal erfolgreich
+            self.dance_probability == 0.4
+        elif self.success == 2:
+            self.dance_probability == 0.6
+        elif self.success == 3:
+            self.dance_probability == 0.8
+
+
         if self.dance_information[3] > 0 and len(
                 self.hive.dance_bees) < MAX_BEES_DANCER:  # noch keine Biene tanzt und Zuckergehalt hoch genug
             # self.dance_information[2] <- Zuckergehalt, self.dance_information[3] = restliche Nahrungsmenge
