@@ -67,6 +67,7 @@ class Bee(pygame.sprite.Sprite):
                 if pygame.sprite.collide_circle(self, food):
                     # Futter und Tanzinformation an Biene übergeben
                     self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
+                    # Da Futter an der Location gefunden wurde wird Sammelerfolg um 1 erhöht
                     self.success = self.success + 1
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
@@ -98,6 +99,8 @@ class Bee(pygame.sprite.Sprite):
                 if not self.foodsource.alive() and pygame.sprite.collide_circle(self, self.foodsource):
                     # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
                     self.change_occupation(Occupation.SCOUT)
+                    #Sammelerfolg wird zurück auf 0 gesetzt
+                    self.success = 0
                     # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die Umgebung absucht
                     self.steps = MAX_STEP_COUNTER_BEES - 150
                     self.reset_dance_information()
