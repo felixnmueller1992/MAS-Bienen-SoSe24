@@ -27,6 +27,8 @@ class Bee(pygame.sprite.Sprite):
         self.steps = 0  # Anzahl Schritte bevor die Biene zum Bienenstock zurückkehren muss (auch ohne Futter)
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
         self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
+        self.success = 0 # Counter wie oft Biene erfolgreich Futter gesammelt hat
+        self.dance_probability =  0 # Tanzwahrscheinlichkeit
 
         # Image
         self.size = 6
@@ -66,6 +68,8 @@ class Bee(pygame.sprite.Sprite):
                 if pygame.sprite.collide_circle(self, food):
                     # Futter und Tanzinformation an Biene übergeben
                     self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
+                    # Da Futter an der Location gefunden wurde wird Sammelerfolg um 1 erhöht
+                    self.success = self.success + 1
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
@@ -96,6 +100,8 @@ class Bee(pygame.sprite.Sprite):
                 if not self.foodsource.alive() and pygame.sprite.collide_circle(self, self.foodsource):
                     # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
                     self.change_occupation(Occupation.SCOUT)
+                    #Sammelerfolg wird zurück auf 0 gesetzt
+                    self.success = 0
                     # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die Umgebung absucht
                     self.steps = MAX_STEP_COUNTER_BEES - 150
                     self.reset_dance_information()
@@ -217,8 +223,16 @@ class Bee(pygame.sprite.Sprite):
         self.capacity = 0  # Nahrung wird von Biene entfernt
 
         # TODO Hier Formel zur Auswertung der Güte der Futterquelle -> Soll Biene Tanzen oder nicht? #####
+        if self.success == 1: # Biene war an Futterquelle erstes Mal erfolgreich
+            self.dance_probability = 0.4
+        elif self.success == 2: # Biene war an Futterquelle zweites Mal erfolgreich
+            self.dance_probability = 0.6
+        elif self.success == 3:
+            self.dance_probability = 0.8 # Biene war an Futterquelle drittes Mal erfolgreich
+
+
         if self.dance_information[3] > 0 and len(
-                self.hive.dance_bees) < MAX_BEES_DANCER:  # noch keine Biene tanzt und Zuckergehalt hoch genug
+                self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random(): # noch keine Biene tanzt, Zuckergehalt hoch genug und Wahrscheinlichkeit hoch genug
             # self.dance_information[2] <- Zuckergehalt, self.dance_information[3] = restliche Nahrungsmenge
             self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
             self.dance_counter = 0  # Tanz beginnt von vorne
