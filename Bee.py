@@ -27,8 +27,8 @@ class Bee(pygame.sprite.Sprite):
         self.steps = 0  # Anzahl Schritte bevor die Biene zum Bienenstock zurückkehren muss (auch ohne Futter)
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
         self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
-        self.success = 0 # Counter wie oft Biene erfolgreich Futter gesammelt hat
-        self.dance_probability =  0 # Tanzwahrscheinlichkeit
+        self.success = 0  # Counter wie oft Biene erfolgreich Futter gesammelt hat
+        self.dance_probability = 0  # Tanzwahrscheinlichkeit
 
         # Image
         self.size = 6
@@ -68,7 +68,7 @@ class Bee(pygame.sprite.Sprite):
                 if pygame.sprite.collide_circle(self, food):
                     # Futter und Tanzinformation an Biene übergeben
                     self.harvest(food.harvest(BEE_MAX_CAPACITY - self.capacity), food)
-                    # Da Futter an der Location gefunden wurde wird Sammelerfolg um 1 erhöht
+                    # Da Futter an der Location gefunden wurde, wird Sammelerfolg um 1 erhöht
                     self.success = self.success + 1
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
@@ -84,12 +84,12 @@ class Bee(pygame.sprite.Sprite):
 
     def update_occupations(self):
         # Maximale Futterkapazität prüfen, begrenzen und zurück zum Bienenstock schicken
-        if not self.occupation == Occupation.IN_HIVE and self.capacity >= BEE_MAX_CAPACITY:
+        if not self.occupation == Occupation.ONLOOKER and self.capacity >= BEE_MAX_CAPACITY:
             self.change_occupation(Occupation.RETURNING)  # Biene muss zurückfliegen
             self.capacity = BEE_MAX_CAPACITY
 
         # Maximale Fluglänge begrenzen und zum Bienenstock zurückschicken
-        if not self.occupation == Occupation.IN_HIVE and self.steps >= MAX_STEP_COUNTER_BEES:
+        if not self.occupation == Occupation.ONLOOKER and self.steps >= MAX_STEP_COUNTER_BEES:
             self.change_occupation(Occupation.RETURNING)  # Biene muss zurückfliegen
 
         # Zustände (Occupation) der Biene
@@ -100,7 +100,7 @@ class Bee(pygame.sprite.Sprite):
                 if not self.foodsource.alive() and pygame.sprite.collide_circle(self, self.foodsource):
                     # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
                     self.change_occupation(Occupation.SCOUT)
-                    #Sammelerfolg wird zurück auf 0 gesetzt
+                    # Sammelerfolg wird zurück auf 0 gesetzt
                     self.success = 0
                     # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die Umgebung absucht
                     self.steps = MAX_STEP_COUNTER_BEES - 150
@@ -111,11 +111,8 @@ class Bee(pygame.sprite.Sprite):
                 if pygame.sprite.collide_circle(self, self.hive):
                     self.x = self.hive.x
                     self.y = self.hive.y
-                    self.change_occupation(Occupation.IN_HIVE)  # Biene ist im Stock
                     self.steps = 0  # Schritt Counter zurücksetzen
-            case Occupation.IN_HIVE:
-                # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
-                self.deliver(MAX_BEES_SCOUT)
+                    self.deliver(MAX_BEES_SCOUT)  # Biene ist im Stock
             case Occupation.DANCER:
                 for onlooker in self.hive.onlooker_bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
                     if self.amount_employed < min(self.dance_information[2], self.dance_information[3]):
@@ -143,9 +140,6 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.RETURNING:
                 # Winkel zum Bienenstock berechnen
                 self.orientate_towards(self.hive)
-            case Occupation.IN_HIVE:
-                # Winkel zum Bienenstock berechnen
-                self.orientate_loosely_towards(self.hive)
             case Occupation.DANCER:
                 # Winkel zum Bienenstock berechnen
                 self.orientate_loosely_towards(self.hive)
@@ -223,20 +217,19 @@ class Bee(pygame.sprite.Sprite):
         self.capacity = 0  # Nahrung wird von Biene entfernt
 
         # TODO Hier Formel zur Auswertung der Güte der Futterquelle -> Soll Biene Tanzen oder nicht? #####
-        if self.success == 1: # Biene war an Futterquelle erstes Mal erfolgreich
+        if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
             self.dance_probability = 0.4
-        elif self.success == 2: # Biene war an Futterquelle zweites Mal erfolgreich
+        elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
             self.dance_probability = 0.6
         elif self.success == 3:
-            self.dance_probability = 0.8 # Biene war an Futterquelle drittes Mal erfolgreich
-
+            self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal erfolgreich
 
         if self.dance_information[3] > 0 and len(
-                self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random(): # noch keine Biene tanzt, Zuckergehalt hoch genug und Wahrscheinlichkeit hoch genug
+                self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random():  # noch keine Biene tanzt, Zuckergehalt hoch genug und Wahrscheinlichkeit hoch genug
             # self.dance_information[2] <- Zuckergehalt, self.dance_information[3] = restliche Nahrungsmenge
             self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
             self.dance_counter = 0  # Tanz beginnt von vorne
-            self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung            
+            self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
         else:  # Biene tanzt nicht, dann
             self.reset_dance_information()
             # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
@@ -266,5 +259,4 @@ class Occupation(Enum):
     EMPLOYED = 1
     ONLOOKER = 2
     RETURNING = 3
-    IN_HIVE = 4
-    DANCER = 5
+    DANCER = 4
