@@ -7,20 +7,38 @@ from Color import *
 
 # Klasse Futterquelle
 class Foodsource(pygame.sprite.Sprite):
-    def __init__(self, units, sugar, distance_to_hive, hive_x, hive_y):
+    def __init__(self, *args):
         super().__init__()
-        self.rect = None
-        self.image = None
-        self.x = random.randint(50, SIMULATION_WIDTH - 50)  # Zufällige Position X
-        if self.x > hive_x - distance_to_hive and self.x < hive_x + distance_to_hive:  # Futterquelle ist zu nah am
-            # Bienenstock
-            self.x = self.x + 2 * distance_to_hive  # Futterquelle vom Bienenstock wegschieben
-        self.y = random.randint(50, SCREEN_HEIGHT - 50)  # Zufällige Position Y
-        self.units = units  # Anzahl Futtereinheiten für diese Futterquelle
-        self.sugar = sugar  # Anzahl Zucker für diese Futterquelle
-        self.radius = self.units
-        self.label_font = pygame.font.SysFont("Arial", 12)
-        self.update_labels()
+
+        if len(args) == 4:
+            self.rect = None
+            self.image = None
+            self.units = args[0]
+            self.sugar = args[1]
+            self.x = args[2]
+            self.y = args[3]
+            self.radius = self.units
+            self.label_font = pygame.font.SysFont("Arial", 12)
+            self.update_labels()
+
+        if len(args) == 5:
+            self.rect = None
+            self.image = None
+            self.units = args[0]  # Anzahl Futtereinheiten für diese Futterquelle
+            self.sugar = args[1]  # Anzahl Zucker für diese Futterquelle
+            distance_to_hive = args[2]  
+            hive_x = args[3]  
+            hive_y = args[4]
+            
+            self.x = random.randint(50, SIMULATION_WIDTH - 50)  # Zufällige Position X
+            if self.x > hive_x - distance_to_hive and self.x < hive_x + distance_to_hive:  # Futterquelle ist zu nah am
+                # Bienenstock
+                self.x = self.x + 2 * distance_to_hive  # Futterquelle vom Bienenstock wegschieben
+            self.y = random.randint(50, SCREEN_HEIGHT - 50)  # Zufällige Position Y
+            
+            self.radius = self.units
+            self.label_font = pygame.font.SysFont("Arial", 12)
+            self.update_labels()
 
     # Futterquelle und Labels zeichnen
     def update_labels(self):
