@@ -100,7 +100,7 @@ def main():
         bee_group.update(foodsource_group)
 
         # Legende auf die Map zeichnen
-        legende_zeichnen(screen, hive_group, total_food_amount)
+        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)
 
         # Simulation auf den darunterliegenden Screen zeichnen
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
