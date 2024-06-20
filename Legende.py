@@ -1,5 +1,6 @@
 import pygame
 from Color import *
+from Config import *
 
 from Bee import Occupation
 
@@ -47,19 +48,26 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
                 total_returner += 1
             case Occupation.DANCER:
                 total_dancer += 1
-            
+
+    total_bees =   BEES_SCOUT + BEES_EMPLOYED + BEES_ONLOOKER     # Aus Config Datei
     legend_items = [
-        ("Scout Biene: " + str(total_scouts), COLOR_BEE_SCOUT),
-        ("Employed Biene: " + str(total_employed), COLOR_BEE_EMPLOYED),
-        ("Onlooker Biene: " + str(total_onlooker), COLOR_BEE_ONLOOKER),
-        ("Biene kehrt zurück: " + str(total_returner), YELLOW),
-        ("Biene Schwänzeltanz: " + str(total_dancer), COLOR_BEE_DANCER)
+        ("Bienen gesamt:", str(total_bees), "",BLACK),
+        ("Scout Biene:", str(total_scouts), str(round(total_scouts/total_bees*100,1)) + "%",COLOR_BEE_SCOUT),
+        ("Employed Biene:", str(total_employed), str(round(total_employed/total_bees*100,1)) + "%", COLOR_BEE_EMPLOYED),
+        ("Onlooker Biene:", str(total_onlooker), str(round(total_onlooker/total_bees*100,1)) + "%", COLOR_BEE_ONLOOKER),
+        ("Biene kehrt zurück:", str(total_returner), str(round(total_returner/total_bees*100,1)) + "%", DARK_GREEN),
+        ("Biene tanzt:", str(total_dancer), str(round(total_dancer/total_bees*100,1)) + "%", COLOR_BEE_DANCER)
     ]
 
     y_offset = 150
-    for text, color in legend_items:
-        color_surface = label_font.render(text, True, color)
+    for occupation, total, percentage, color in legend_items:
+        color_surface = label_font.render(occupation, True, color)
         screen.blit(color_surface, (10, y_offset))
+        color_surface = label_font.render(total, True, color)
+        screen.blit(color_surface, (130, y_offset))
+        color_surface = label_font.render(percentage, True, color)
+        screen.blit(color_surface, (160, y_offset))
+
         y_offset += 30
 
 
