@@ -73,13 +73,13 @@ def main():
             environment_data = ["Foodsource",foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
             export_szenario(environment_data)
             
-
     # Hauptschleife
     running = True
-    while running:
-        for event in pygame.event.get():
+    while running:  
+        for event in pygame.event.get():            
             if event.type == pygame.QUIT:
-                running = False
+                running = False   
+            
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
             running = False
 
@@ -98,10 +98,10 @@ def main():
         # Bienen auf Karte zeichnen
         bee_group.draw(simulation_screen)
         bee_group.update(foodsource_group)
-
+        
         # Legende auf die Map zeichnen
-        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)
-
+        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)   
+        
         # Simulation auf den darunterliegenden Screen zeichnen
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
 
