@@ -1,8 +1,10 @@
 import pygame
 from Color import *
 
+from Bee import Occupation
 
-def legende_zeichnen(screen, hive_group, total_food_amount):
+
+def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
     # Schriftart für Labels
     label_font = pygame.font.SysFont("Arial", 16)
     header_font = pygame.font.SysFont("Arial", 20, bold=True)
@@ -27,12 +29,31 @@ def legende_zeichnen(screen, hive_group, total_food_amount):
     screen.blit(food_surface_2, (10, 110))
 
     # Zeichne Labels für Legende
+    total_scouts = 0
+    total_employed = 0
+    total_onlooker = 0
+    total_returner = 0
+    total_dancer = 0
+
+    for bee in bee_group:
+        match bee.occupation: 
+            case Occupation.SCOUT:
+                total_scouts += 1
+            case Occupation.EMPLOYED:
+                total_employed += 1
+            case Occupation.ONLOOKER:
+                total_onlooker += 1
+            case Occupation.RETURNING:
+                total_returner += 1
+            case Occupation.DANCER:
+                total_dancer += 1
+            
     legend_items = [
-        ("Scout Biene", COLOR_BEE_SCOUT),
-        ("Employed Biene", COLOR_BEE_EMPLOYED),
-        ("Onlooker Biene", COLOR_BEE_ONLOOKER),
-        ("Biene kehrt zurück", YELLOW),
-        ("Biene Schwänzeltanz", COLOR_BEE_DANCER)
+        ("Scout Biene: " + str(total_scouts), COLOR_BEE_SCOUT),
+        ("Employed Biene: " + str(total_employed), COLOR_BEE_EMPLOYED),
+        ("Onlooker Biene: " + str(total_onlooker), COLOR_BEE_ONLOOKER),
+        ("Biene kehrt zurück: " + str(total_returner), YELLOW),
+        ("Biene Schwänzeltanz: " + str(total_dancer), COLOR_BEE_DANCER)
     ]
 
     y_offset = 150
