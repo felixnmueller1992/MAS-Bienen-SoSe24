@@ -181,7 +181,7 @@ class Bee(pygame.sprite.Sprite):
         elif self.occupation == Occupation.ONLOOKER:  # Biene ist Onlooker
             pygame.draw.circle(self.image, COLOR_BEE_ONLOOKER, (self.radius, self.radius), 2)
         elif self.occupation == Occupation.RETURNING:  # Biene fliegt zurück zum Bienenstock
-            pygame.draw.circle(self.image, YELLOW, (self.radius, self.radius), 4)
+            pygame.draw.circle(self.image, DARK_GREEN, (self.radius, self.radius), 4)
         elif self.occupation == Occupation.DANCER:  # Biene tanzt
             pygame.draw.circle(self.image, COLOR_BEE_DANCER, (self.radius, self.radius), 6)
 
