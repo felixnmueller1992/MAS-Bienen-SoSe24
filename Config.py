@@ -15,6 +15,7 @@ MIN_RANGE_FOOD_TO_HIVE = 150  # Wie weit müssen Futterquellen mindestens vom Bi
 # Parameter Biene
 MAX_VELOCITY_BEE = 200  # Maximale Geschwindigkeit einer Biene
 MIN_VELOCITY_BEE = 160  # Minimale Geschwindigkeit einer Biene
+WALKING_SPEED = 0.4 # Faktor für die Gehgeschwindigkeit einer Biene
 BEE_VISION = 30  # Sichtradius einer Biene
 BEE_MAX_CAPACITY = 2  # Maximale Anzahl Futter das eine Biene tragen kann
 REDUCE_SPEED_WHEN_CARRY = 15  # Reduktion der Geschwindigkeit, wenn die Biene Nahrung trägt
