@@ -136,7 +136,12 @@ class Bee(pygame.sprite.Sprite):
                 self.orientate_towards(self.foodsource)
             case Occupation.ONLOOKER:
                 # Winkel zum Bienenstock berechnen
-                self.orientate_loosely_towards(self.hive)
+                if not self.is_in_hive():
+                    # Lässt die Biene umdrehen
+                    self.orientation = self.orientation + 180
+                    self.orientation = self.orientation % (2 * math.pi)
+                else:
+                    self.orientation = self.orientation + random.uniform(-0.2, 0.2)
             case Occupation.RETURNING:
                 # Winkel zum Bienenstock berechnen
                 self.orientate_towards(self.hive)
@@ -158,10 +163,19 @@ class Bee(pygame.sprite.Sprite):
             self.orientation = self.orientation * random.randint(2, 5)  # Zufällige neue Orientierung
             self.y = SCREEN_HEIGHT - 1
 
+    def is_in_hive(self):
+        distance = math.sqrt((self.x - self.hive.x) ** 2 + (self.y - self.hive.y) ** 2)
+        return distance <= self.hive.radius
+
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
-        self.x += math.cos(self.orientation) * self.speed / 100
-        self.y += math.sin(self.orientation) * self.speed / 100
+        if self.occupation == Occupation.ONLOOKER:
+            self.x += math.cos(self.orientation) * WALKING_SPEED
+            self.y += math.sin(self.orientation) * WALKING_SPEED
+        else:
+            self.x += math.cos(self.orientation) * self.speed / 100
+            self.y += math.sin(self.orientation) * self.speed / 100
+
         if self.occupation is Occupation.SCOUT:
             self.steps = self.steps + 1  # Schritt counter um 1 addieren
 
