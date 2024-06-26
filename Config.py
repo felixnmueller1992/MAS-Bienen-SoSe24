@@ -2,7 +2,7 @@
 BEES_SCOUT = 10  # Anzahl Scout Bienen im System zum Start
 BEES_EMPLOYED = 0  # Anzahl Employed Bienen im System zum Start
 BEES_ONLOOKER = 200  # Anzahl Onlooker Bienen im System zum Start
-MAX_BEES_SCOUT = 10  # Anzahl maximale Scout Bienen im System
+MAX_BEES_SCOUT = (BEES_SCOUT + BEES_EMPLOYED + BEES_ONLOOKER) * 0.4   # Anzahl maximale Scout Bienen im System
 MAX_BEES_DANCER = 5  # Anzahl maximale tanzende Bienen
 FOOD_COUNT = 10  # Anzahl Futterquellen im System
 MAX_SUGAR = 7  # Maximale Anzahl Zuckereinheiten pro Futterquelle

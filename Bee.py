@@ -115,7 +115,7 @@ class Bee(pygame.sprite.Sprite):
                     self.steps = 0  # Schritt Counter zurücksetzen
             case Occupation.IN_HIVE:
                 # Nahrungsübergabe an Bienenstock und Zuckergehalt übergabe
-                self.deliver()
+                self.deliver(MAX_BEES_SCOUT)
             case Occupation.DANCER:
                 for onlooker in self.hive.onlooker_bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
                     if self.amount_employed < min(self.dance_information[2], self.dance_information[3]):
@@ -215,7 +215,7 @@ class Bee(pygame.sprite.Sprite):
             self.change_occupation(Occupation.RETURNING)  # Biene ist voll und muss in den Bienenstock fliegen
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 
-    def deliver(self):  # Futter abgeben
+    def deliver(self, MAX_BEES_SCOUT):  # Futter abgeben
         if self.capacity != 0:  # Biene hat Futter dabei
             self.hive.deposit(self.capacity, self.dance_information[2])
             self.speed = self.speed + REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit erhöhen wenn Biene kein Futter mehr
@@ -236,9 +236,12 @@ class Bee(pygame.sprite.Sprite):
             # self.dance_information[2] <- Zuckergehalt, self.dance_information[3] = restliche Nahrungsmenge
             self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
             self.dance_counter = 0  # Tanz beginnt von vorne
-            self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
+            self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung            
         else:  # Biene tanzt nicht, dann
             self.reset_dance_information()
+            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
+            if len(self.hive.dance_bees) > 0:
+                MAX_BEES_SCOUT = len(self.hive.bees) * ((-2.046 *  len(self.hive.dance_bees) / (len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
             # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
             if len(self.hive.scout_bees) >= MAX_BEES_SCOUT:
                 self.change_occupation(Occupation.ONLOOKER)
