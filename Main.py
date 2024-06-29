@@ -1,4 +1,5 @@
 import random
+import pandas as pd
 
 from Config import *
 from Foodsource import Foodsource
@@ -73,11 +74,66 @@ def main():
             environment_data = ["Foodsource",foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
             export_szenario(environment_data)
             
+
+    # Timer-Setup für Dateiexport/Plot
+    export_data_event = pygame.USEREVENT + 1
+    pygame.time.set_timer(export_data_event, EXPORT_DATA_INTERVALL)
+    telemetry_df = pd.DataFrame()
+
     # Hauptschleife
     running = True
     while running:  
-        for event in pygame.event.get():            
+        telemetry_df_temp = pd.DataFrame() 
+        for event in pygame.event.get(): 
+            # Abtasten von Daten für Datenexport und Analysen
+            if event.type == export_data_event:
+                # Sammle generelle Daten für Legende und Dateiexport
+                timetag = str(round((pygame.time.get_ticks() / 1000),1))
+                gathered_food = sum([hive.food_count for hive in hive_group])
+                general_data = {
+                    "timetag [s]": [timetag], 
+                    "gathered_food": [gathered_food], 
+                    "total_food_amount": [total_food_amount]
+                }
+                telemetry_df_temp = pd.DataFrame(general_data)
+
+                # Sammle Bienendaten für Legende und Dateiexport
+                total_scouts, total_employed, total_onlooker, total_returner, total_dancer = 0,0,0,0,0     
+                for id,bee in enumerate(bee_group):
+                    id += 1
+                    match bee.occupation: 
+                        case Occupation.SCOUT:
+                            total_scouts += 1
+                        case Occupation.EMPLOYED:
+                            total_employed += 1
+                        case Occupation.ONLOOKER:
+                            total_onlooker += 1
+                        case Occupation.RETURNING:
+                            total_returner += 1
+                        case Occupation.DANCER:
+                            total_dancer += 1
+
+                    if EXPORT_COMPLETE_BEE_GROUP == True:
+                        bee_data_temp = {
+                            "bee_"+str(id)+"_occupation": [str(bee.occupation).split('.')[1]],
+                            "bee_"+str(id)+"_capacity": [bee.capacity],
+                            "bee_"+str(id)+"_success": [bee.success]
+                        }                                                       
+                        telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_data_temp)],axis=1)          
+
+                bee_population_data = {
+                        "total_scouts": [total_scouts],
+                        "total_employed": [total_employed],
+                        "total_onlooker": [total_onlooker],
+                        "total_returner": [total_returner],
+                        "total_dancer": [total_dancer]
+                }
+                
+                telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_population_data)],axis=1)
+                telemetry_df = pd.concat([telemetry_df,telemetry_df_temp])
+            
             if event.type == pygame.QUIT:
+                telemetry_df.to_excel("ExportData.xlsx", index=False)
                 running = False   
             
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
@@ -99,7 +155,7 @@ def main():
         bee_group.draw(simulation_screen)
         bee_group.update(foodsource_group)
         
-        # Legende auf die Map zeichnen
+        # Legende auf die Map zeichnen                     
         legende_zeichnen(screen, hive_group, bee_group, total_food_amount)   
         
         # Simulation auf den darunterliegenden Screen zeichnen
