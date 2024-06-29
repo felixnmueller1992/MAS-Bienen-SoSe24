@@ -1,5 +1,5 @@
 # Parameter Simulation
-BEES_SCOUT = 10  # Anzahl Scout Bienen im System zum Start
+BEES_SCOUT = 20  # Anzahl Scout Bienen im System zum Start
 BEES_EMPLOYED = 0  # Anzahl Employed Bienen im System zum Start
 BEES_ONLOOKER = 200  # Anzahl Onlooker Bienen im System zum Start
 MAX_BEES_SCOUT = 10  # Anzahl maximale Scout Bienen im System
@@ -33,5 +33,8 @@ SIMULATION_WIDTH = 1400
 # Testing
 EXPORT_ENVIRONMENT = False
 IMPORT_ENVIRONMENT_FILE = ""
+EXPORT_COMPLETE_BEE_GROUP = True
+EXPORT_DATA_INTERVALL = 1000 # Intervall [ms]
+
 
 
