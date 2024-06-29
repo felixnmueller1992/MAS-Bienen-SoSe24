@@ -6,7 +6,9 @@ from Foodsource import Foodsource
 from Hive import Hive
 from Legende import *
 from Szenario import *
+from DataExport import *
 
+file_date = time.strftime("%Y%m%d_%H%M%S")
 
 # Hauptfunktion
 def main():
@@ -68,11 +70,11 @@ def main():
 
         for hive in hive_group:
             environment_data = ["Hive", "N/A" , "N/A", hive.x, hive.y]
-            export_szenario(environment_data)
+            export_szenario(environment_data,file_date)
 
         for foodsource in foodsource_group:
             environment_data = ["Foodsource",foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
-            export_szenario(environment_data)
+            export_szenario(environment_data,file_date)
             
 
     # Timer-Setup für Dateiexport/Plot
@@ -83,60 +85,21 @@ def main():
     # Hauptschleife
     running = True
     while running:  
-        telemetry_df_temp = pd.DataFrame() 
+        #telemetry_df_temp = pd.DataFrame() 
         for event in pygame.event.get(): 
             # Abtasten von Daten für Datenexport und Analysen
             if event.type == export_data_event:
-                # Sammle generelle Daten für Legende und Dateiexport
-                timetag = str(round((pygame.time.get_ticks() / 1000),1))
-                gathered_food = sum([hive.food_count for hive in hive_group])
-                general_data = {
-                    "timetag [s]": [timetag], 
-                    "gathered_food": [gathered_food], 
-                    "total_food_amount": [total_food_amount]
-                }
-                telemetry_df_temp = pd.DataFrame(general_data)
-
-                # Sammle Bienendaten für Legende und Dateiexport
-                total_scouts, total_employed, total_onlooker, total_returner, total_dancer = 0,0,0,0,0     
-                for id,bee in enumerate(bee_group):
-                    id += 1
-                    match bee.occupation: 
-                        case Occupation.SCOUT:
-                            total_scouts += 1
-                        case Occupation.EMPLOYED:
-                            total_employed += 1
-                        case Occupation.ONLOOKER:
-                            total_onlooker += 1
-                        case Occupation.RETURNING:
-                            total_returner += 1
-                        case Occupation.DANCER:
-                            total_dancer += 1
-
-                    if EXPORT_COMPLETE_BEE_GROUP == True:
-                        bee_data_temp = {
-                            "bee_"+str(id)+"_occupation": [str(bee.occupation).split('.')[1]],
-                            "bee_"+str(id)+"_capacity": [bee.capacity],
-                            "bee_"+str(id)+"_success": [bee.success]
-                        }                                                       
-                        telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_data_temp)],axis=1)          
-
-                bee_population_data = {
-                        "total_scouts": [total_scouts],
-                        "total_employed": [total_employed],
-                        "total_onlooker": [total_onlooker],
-                        "total_returner": [total_returner],
-                        "total_dancer": [total_dancer]
-                }
-                
-                telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_population_data)],axis=1)
+                telemetry_df_temp = daten_exportieren(hive_group, bee_group, total_food_amount)
                 telemetry_df = pd.concat([telemetry_df,telemetry_df_temp])
-            
+                
             if event.type == pygame.QUIT:
-                telemetry_df.to_excel("ExportData.xlsx", index=False)
+                if EXPORT_SIMULATION == True:
+                    telemetry_df.to_excel(file_date +"_Simulationsdaten.xlsx", index=False)
                 running = False   
             
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
+            if EXPORT_SIMULATION == True:
+                telemetry_df.to_excel(file_date +"_Simulationsdaten.xlsx", index=False)
             running = False
 
         # Hintergrund zeichnen
