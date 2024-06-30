@@ -1,8 +1,11 @@
 import pygame
 from Color import *
+from Config import *
+
+from Bee import Occupation
 
 
-def legende_zeichnen(screen, hive_group, total_food_amount):
+def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
     # Schriftart für Labels
     label_font = pygame.font.SysFont("Arial", 16)
     header_font = pygame.font.SysFont("Arial", 20, bold=True)
@@ -27,18 +30,45 @@ def legende_zeichnen(screen, hive_group, total_food_amount):
     screen.blit(food_surface_2, (10, 110))
 
     # Zeichne Labels für Legende
+    total_scouts = 0
+    total_employed = 0
+    total_onlooker = 0
+    total_returner = 0
+    total_dancer = 0
+
+    for bee in bee_group:
+        match bee.occupation:
+            case Occupation.SCOUT:
+                total_scouts += 1
+            case Occupation.EMPLOYED:
+                total_employed += 1
+            case Occupation.ONLOOKER:
+                total_onlooker += 1
+            case Occupation.RETURNING:
+                total_returner += 1
+            case Occupation.DANCER:
+                total_dancer += 1
+
+    total_bees = BEES_SCOUT + BEES_EMPLOYED + BEES_ONLOOKER  # Aus Config Datei
     legend_items = [
-        ("Scout Biene", COLOR_BEE_SCOUT),
-        ("Employed Biene", COLOR_BEE_EMPLOYED),
-        ("Onlooker Biene", COLOR_BEE_ONLOOKER),
-        ("Biene kehrt zurück", YELLOW),
-        ("Biene Schwänzeltanz", COLOR_BEE_DANCER)
+        ("Bienen gesamt:", str(total_bees), "", BLACK),
+        ("Scout Biene:", str(total_scouts), str(round(total_scouts / total_bees * 100, 1)) + "%", COLOR_BEE_SCOUT),
+        ("Employed Biene: ", str(total_employed), str(round(total_employed / total_bees * 100, 1)) + "%",
+         COLOR_BEE_EMPLOYED),
+        ("Onlooker Biene:", str(total_onlooker), str(round(total_onlooker / total_bees * 100, 1)) + "%",
+         COLOR_BEE_ONLOOKER),
+        ("Biene kehrt zurück:", str(total_returner), str(round(total_returner / total_bees * 100, 1)) + "%",
+            DARK_GREEN),
+        ("Biene tanzt:", str(total_dancer), str(round(total_dancer / total_bees * 100, 1)) + "%", COLOR_BEE_DANCER)
     ]
 
     y_offset = 150
-    for text, color in legend_items:
-        color_surface = label_font.render(text, True, color)
+    for occupation, total, percentage, color in legend_items:
+        color_surface = label_font.render(occupation, True, color)
         screen.blit(color_surface, (10, y_offset))
+        color_surface = label_font.render(total, True, color)
+        screen.blit(color_surface, (150, y_offset))
+        color_surface = label_font.render(percentage, True, color)
+        screen.blit(color_surface, (190, y_offset))
+
         y_offset += 30
-
-

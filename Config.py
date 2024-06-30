@@ -1,5 +1,5 @@
 # Parameter Simulation
-BEES_SCOUT = 10  # Anzahl Scout Bienen im System zum Start
+BEES_SCOUT = 20  # Anzahl Scout Bienen im System zum Start
 BEES_EMPLOYED = 0  # Anzahl Employed Bienen im System zum Start
 BEES_ONLOOKER = 200  # Anzahl Onlooker Bienen im System zum Start
 MAX_BEES_SCOUT = (BEES_SCOUT + BEES_EMPLOYED + BEES_ONLOOKER) * 0.4   # Anzahl maximale Scout Bienen im System
@@ -26,7 +26,7 @@ MAX_DANCE_COUNTER = 100  # Dauer des Schwänzeltanz
 
 # Bildschirmgröße
 SCREEN_HEIGHT = 800
-SCREEN_WIDTH = 1600
+SCREEN_WIDTH = 1650
 
 SIMULATION_WIDTH = 1400
 
@@ -34,4 +34,6 @@ SIMULATION_WIDTH = 1400
 EXPORT_ENVIRONMENT = False
 IMPORT_ENVIRONMENT_FILE = ""
 
-
+EXPORT_SIMULATION = False
+EXPORT_COMPLETE_BEE_GROUP = False
+EXPORT_DATA_INTERVALL = 1000  # Intervall [ms]

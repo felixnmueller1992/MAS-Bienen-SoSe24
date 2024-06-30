@@ -1,11 +1,14 @@
 import random
+import pandas as pd
 
 from Config import *
 from Foodsource import Foodsource
 from Hive import Hive
 from Legende import *
 from Szenario import *
+from DataExport import *
 
+file_date = time.strftime("%Y%m%d_%H%M%S")
 
 # Hauptfunktion
 def main():
@@ -67,20 +70,36 @@ def main():
 
         for hive in hive_group:
             environment_data = ["Hive", "N/A" , "N/A", hive.x, hive.y]
-            export_szenario(environment_data)
+            export_szenario(environment_data,file_date)
 
         for foodsource in foodsource_group:
             environment_data = ["Foodsource",foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
-            export_szenario(environment_data)
+            export_szenario(environment_data,file_date)
             
+
+    # Timer-Setup für Dateiexport/Plot
+    export_data_event = pygame.USEREVENT + 1
+    pygame.time.set_timer(export_data_event, EXPORT_DATA_INTERVALL)
+    telemetry_df = pd.DataFrame()
 
     # Hauptschleife
     running = True
-    while running:
-        for event in pygame.event.get():
+    while running:  
+        #telemetry_df_temp = pd.DataFrame() 
+        for event in pygame.event.get(): 
+            # Abtasten von Daten für Datenexport und Analysen
+            if event.type == export_data_event:
+                telemetry_df_temp = daten_exportieren(hive_group, bee_group, total_food_amount)
+                telemetry_df = pd.concat([telemetry_df,telemetry_df_temp])
+                
             if event.type == pygame.QUIT:
-                running = False
+                if EXPORT_SIMULATION == True:
+                    telemetry_df.to_excel(file_date +"_Simulationsdaten.xlsx", index=False)
+                running = False   
+            
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
+            if EXPORT_SIMULATION == True:
+                telemetry_df.to_excel(file_date +"_Simulationsdaten.xlsx", index=False)
             running = False
 
         # Hintergrund zeichnen
@@ -98,10 +117,10 @@ def main():
         # Bienen auf Karte zeichnen
         bee_group.draw(simulation_screen)
         bee_group.update(foodsource_group)
-
-        # Legende auf die Map zeichnen
-        legende_zeichnen(screen, hive_group, total_food_amount)
-
+        
+        # Legende auf die Map zeichnen                     
+        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)   
+        
         # Simulation auf den darunterliegenden Screen zeichnen
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
 
