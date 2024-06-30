@@ -35,7 +35,6 @@ class Bee(pygame.sprite.Sprite):
         self.success = 0  # Counter wie oft Biene erfolgreich Futter gesammelt hat
 
         # Sammler-/Employed Bee Attribute
-        self.destination = 0, 0, 0  # Koordinaten und Zuckergehalt des Ziels
         self.capacity = 0  # Aktuelle tragende Nahrungsanzahl der Biene
         self.foodsource = None  # Futterquelle an der die Biene employed ist oder die sie gefunden hat
 
