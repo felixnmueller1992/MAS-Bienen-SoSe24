@@ -12,6 +12,8 @@ from enum import Enum
 class Bee(pygame.sprite.Sprite):
     def __init__(self, occupation, hive):
         super().__init__()
+
+        # Generelle Attribute
         self.x = hive.x  # Startposition X im Bienenstock
         self.y = hive.y  # Startposition Y im Bienenstock
         self.hive = hive
@@ -19,27 +21,29 @@ class Bee(pygame.sprite.Sprite):
         self.change_occupation(occupation)
         self.speed = random.randint(MIN_VELOCITY_BEE, MAX_VELOCITY_BEE)  # Zufällige Geschwindigkeit
         self.orientation = random.uniform(0.0, 360.0)  # Zufällige Start-Orientierung
-        self.capacity = 0  # Aktuelle tragende Nahrungsanzahl der Biene
-        self.destination = 0, 0, 0  # Koordinaten und Zuckergehalt des Ziels
-        self.foodsource = None  # Futterquelle an der die Biene employed ist oder die sie gefunden hat
-        self.dance_information = 0.0, 0.0, 0, 0  # Koordinaten X/Y, Zuckergehalt und übrige Menge der gefunden
-        # Nahrungsquelle
-        self.steps = 0  # Anzahl Schritte bevor die Biene zum Bienenstock zurückkehren muss (auch ohne Futter)
-        self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
-        self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
-        self.success = 0  # Counter wie oft Biene erfolgreich Futter gesammelt hat
-        self.dance_probability = 0  # Tanzwahrscheinlichkeit
 
-        # Image
+        # Sprite Attribute
         self.size = 6
         self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
         self.radius = self.size / 2
-
-        # Rect
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
-
         self.update_image()
+
+        # Scout Attribute
+        self.steps = 0  # Anzahl Schritte bevor die Biene zum Bienenstock zurückkehren muss (auch ohne Futter)
+        self.success = 0  # Counter wie oft Biene erfolgreich Futter gesammelt hat
+
+        # Sammler-/Employed Bee Attribute
+        self.destination = 0, 0, 0  # Koordinaten und Zuckergehalt des Ziels
+        self.capacity = 0  # Aktuelle tragende Nahrungsanzahl der Biene
+        self.foodsource = None  # Futterquelle an der die Biene employed ist oder die sie gefunden hat
+
+        # Tänzer Attribute
+        self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
+        self.dance_information = 0.0, 0.0, 0, 0  # Koordinaten X/Y, Zuckergehalt und übrige Menge der gefundenen Nahrung
+        self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
+        self.dance_probability = 0  # Tanzwahrscheinlichkeit
 
     def reset_dance_information(self):
         self.amount_employed = 0
@@ -106,7 +110,9 @@ class Bee(pygame.sprite.Sprite):
                     self.steps = MAX_STEP_COUNTER_BEES - 150
                     self.reset_dance_information()
             case Occupation.ONLOOKER:
-                pass
+                for dancefloor in self.hive.dance_floors:
+                    if pygame.sprite.collide_circle(self, dancefloor):
+                        print("Collision")
             case Occupation.RETURNING:
                 if pygame.sprite.collide_circle(self, self.hive):
                     self.x = self.hive.x
@@ -268,7 +274,6 @@ class Bee(pygame.sprite.Sprite):
         self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
         self.dance_counter = 0  # Tanz beginnt von vorne
         self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
-
 
 
 class Occupation(Enum):
