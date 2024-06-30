@@ -76,7 +76,7 @@ class Bee(pygame.sprite.Sprite):
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
-        distance = math.sqrt((self.x - circle.x) ** 2 + (self.y - circle.y) ** 2)
+        distance = math.hypot(self.x - circle.x, self.y - circle.y)
         return distance < (self.radius + circle.radius) + BEE_VISION
 
     def orientate_towards(self, sprite):
@@ -169,7 +169,7 @@ class Bee(pygame.sprite.Sprite):
             self.y = SCREEN_HEIGHT - 1
 
     def is_in_hive(self):
-        distance = math.sqrt((self.x - self.hive.x) ** 2 + (self.y - self.hive.y) ** 2)
+        distance = math.hypot(self.x - self.hive.x, self.y - self.hive.y)
         return distance <= self.hive.radius
 
     def update_movement(self):
