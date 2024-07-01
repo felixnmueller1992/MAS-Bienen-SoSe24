@@ -240,14 +240,25 @@ class Bee(pygame.sprite.Sprite):
         else:  # Biene tanzt nicht, dann
             self.reset_dance_information()
             # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
-            if len(self.hive.dance_bees) > 0:
-                MAX_BEES_SCOUT = len(self.hive.bees) * ((-2.046 *  len(self.hive.dance_bees) / (len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
-            # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
-            if len(self.hive.scout_bees) >= MAX_BEES_SCOUT:
-                self.change_occupation(Occupation.ONLOOKER)
+            if len(self.hive.bees) > 0:
+                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  len(self.hive.dance_bees) / (len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
+                # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
+                if len(self.hive.scout_bees) >= temp_bee_scouts:
+                    self.change_occupation(Occupation.ONLOOKER)
+            else:
+                self.change_occupation(Occupation.EMPLOYED)  # Ansonsten wird Biene wird Scout Biene
+                #self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
+
+        if self.dance_information[3] == 0:
+            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
+            if len(self.hive.bees) > 0:
+                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  len(self.hive.dance_bees) / (len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
+                # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
+            if len(self.hive.scout_bees) >= temp_bee_scouts:
+                    self.change_occupation(Occupation.ONLOOKER)
             else:
                 self.change_occupation(Occupation.SCOUT)  # Ansonsten wird Biene wird Scout Biene
-                self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
+                self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung       
 
 
 class Occupation(Enum):
