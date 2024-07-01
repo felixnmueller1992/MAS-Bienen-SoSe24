@@ -58,7 +58,7 @@ def main():
     # Verwalte Dancefloors
     dancefloor_group = pygame.sprite.Group()
     for hive in hive_group:
-        dancefloor_group.add(hive.dance_floors)
+        dancefloor_group.add(hive.dancefloor_list)
 
     # Erzeuge Bienen
     bee_group = pygame.sprite.Group()
