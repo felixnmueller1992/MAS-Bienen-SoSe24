@@ -1,3 +1,6 @@
+import math
+import random
+
 import pygame
 
 from enum import Enum
@@ -14,13 +17,13 @@ class Hive(pygame.sprite.Sprite):
         super().__init__()
         self.x = x
         self.y = y
-        self.food_count = 0  # Anzahl Nahrung im Bienenstock
+        self.food_count = 0
 
         self.algorithm = Algorithm.ABC
 
-        self.size = 75
+        self.size = 100
         self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-        self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
+        self.image.fill((0, 0, 0, 0))
         self.radius = self.size / 2
         pygame.draw.circle(self.image, BLACK, (self.radius, self.radius), self.radius)
 
@@ -33,6 +36,9 @@ class Hive(pygame.sprite.Sprite):
         self.employed_bees = pygame.sprite.Group()
         self.onlooker_bees = pygame.sprite.Group()
         self.dance_bees = pygame.sprite.Group()
+
+        # Dancefloor-Liste
+        self.dancefloor_list = []
 
     # Bienen werden nach Ratio erzeugt mit jeweiliger Occupation
     def create_bees(self):
@@ -47,18 +53,64 @@ class Hive(pygame.sprite.Sprite):
             case Algorithm.NONE:
                 pass
 
-    def deposit(self, food_amount, sugar_amount):  # Nahrung wird an Bienenstock übergeben
+    # Nahrung wird an Bienenstock übergeben
+    def deposit(self, food_amount, sugar_amount):
         self.food_count = self.food_count + (food_amount * sugar_amount)
-      
+
+    def find_dancefloor_position(self):
+        # Wenn nach hundert Versuchen kein geeigneter Platz gefunden wurde, dann geben wir None als Dancefloor zurück
+        # und die Biene tanzt nicht. Verhindert Endlosschleife beim Finden eines geeigneten Platzes im Hive.
+        for i in range(100):
+            pos_x = random.uniform(self.rect.left + DANCEFLOOR_RADIUS,
+                                   self.rect.right - DANCEFLOOR_RADIUS)
+            pos_y = random.uniform(self.rect.top + DANCEFLOOR_RADIUS,
+                                   self.rect.bottom - DANCEFLOOR_RADIUS)
+
+            if math.hypot(pos_x - self.rect.centerx, pos_y - self.rect.centery) <= self.radius - DANCEFLOOR_RADIUS:
+                if not self.overlaps_with_existing_dancefloor(pos_x, pos_y):
+                    return pos_x, pos_y
+
+    def overlaps_with_existing_dancefloor(self, x, y):
+        for dancefloor in self.dancefloor_list:
+            distance = math.hypot(x - dancefloor.rect.centerx, y - dancefloor.rect.centery)
+            # Wenn der Abstand geringer ist als die beiden Radien, dann überlappen sich die Tanzflächen.
+            if distance < (DANCEFLOOR_RADIUS + dancefloor.radius):
+                return True
+        return False
+
+    def create_dancefloor(self):
+        position = self.find_dancefloor_position()
+        if position:
+            x, y = position
+            new_dancefloor = Dancefloor(x, y)
+            self.dancefloor_list.append(new_dancefloor)
+            return new_dancefloor
+        return None
 
     def update(self):
         pass
-        # print(f'Bees:{len(self.bees)}, SCOUT:{len(self.scout_bees)}, EMPLOYED:{len(self.employed_bees)}'
-        #       f', ONLOOKER:{len(self.onlooker_bees)}, DANCERS:{len(self.dance_bees)}')
+
+
+# Klasse für Tanzflächen im Hive
+class Dancefloor(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.x = x
+        self.y = y
+        self.radius = 5
+        self.image = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
+        self.image.fill((0, 0, 0, 0))  # Macht das Rectangle im Hintergrund unsichtbar
+        pygame.draw.circle(self.image, YELLOW, (self.radius, self.radius), self.radius)
+
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+
+    def update(self):
+        pass
+
 
 # Enum für Algorithmus
 class Algorithm(Enum):
     ABC = 1
     BEE = 2
     NONE = 3
-
