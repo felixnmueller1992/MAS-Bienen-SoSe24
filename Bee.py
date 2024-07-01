@@ -241,7 +241,7 @@ class Bee(pygame.sprite.Sprite):
             self.reset_dance_information()
             # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
             if len(self.hive.bees) > 0:
-                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  len(self.hive.dance_bees) / (len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
+                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  (len(self.hive.dance_bees) / len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
                 # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
                 if len(self.hive.scout_bees) >= temp_bee_scouts:
                     self.change_occupation(Occupation.ONLOOKER)
@@ -252,7 +252,7 @@ class Bee(pygame.sprite.Sprite):
         if self.dance_information[3] == 0:
             # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
             if len(self.hive.bees) > 0:
-                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  len(self.hive.dance_bees) / (len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
+                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  (len(self.hive.dance_bees) / len(self.hive.bees) * 100) + 46.074) / 100)         #Formel aus linearer Interpolation von Lit. Daten abgeleitet
                 # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
             if len(self.hive.scout_bees) >= temp_bee_scouts:
                     self.change_occupation(Occupation.ONLOOKER)
