@@ -43,6 +43,7 @@ class Bee(pygame.sprite.Sprite):
         self.dance_information = 0.0, 0.0, 0, 0  # Koordinaten X/Y, Zuckergehalt und übrige Menge der gefundenen Nahrung
         self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
         self.dance_probability = 0  # Tanzwahrscheinlichkeit
+        self.dancefloor = None
 
     def reset_dance_information(self):
         self.amount_employed = 0
@@ -82,9 +83,6 @@ class Bee(pygame.sprite.Sprite):
     def orientate_towards(self, sprite):
         self.orientation = math.atan2(sprite.y - self.y, sprite.x - self.x)
 
-    def orientate_loosely_towards(self, sprite):
-        self.orientation = math.atan((sprite.y - self.y) / (sprite.x - self.x)) * 180 / math.pi
-
     def update_occupations(self):
         # Maximale Futterkapazität prüfen, begrenzen und zurück zum Bienenstock schicken
         if not self.occupation == Occupation.ONLOOKER and self.capacity >= BEE_MAX_CAPACITY:
@@ -109,15 +107,15 @@ class Bee(pygame.sprite.Sprite):
                     self.steps = MAX_STEP_COUNTER_BEES - 150
                     self.reset_dance_information()
             case Occupation.ONLOOKER:
-                for dancefloor in self.hive.dance_floors:
+                for dancefloor in self.hive.dancefloor_list:
                     if pygame.sprite.collide_circle(self, dancefloor):
-                        print("Collision")
+                        pass
             case Occupation.RETURNING:
                 if pygame.sprite.collide_circle(self, self.hive):
                     self.x = self.hive.x
                     self.y = self.hive.y
                     self.steps = 0  # Schritt Counter zurücksetzen
-                    self.deliver(MAX_BEES_SCOUT)  # Biene ist im Stock
+                    self.deliver()  # Biene ist im Stock
             case Occupation.DANCER:
                 for onlooker in self.hive.onlooker_bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
                     if self.amount_employed < min(self.dance_information[2], self.dance_information[3]):
@@ -152,7 +150,7 @@ class Bee(pygame.sprite.Sprite):
                 self.orientate_towards(self.hive)
             case Occupation.DANCER:
                 # Winkel zum Bienenstock berechnen
-                self.orientate_loosely_towards(self.hive)
+                self.orientate_towards(self.dancefloor)
 
         # Kontrollieren ob Biene über Simulationsgrenzen fliegt und umkehren lassen
         if self.x <= 0:
@@ -228,7 +226,7 @@ class Bee(pygame.sprite.Sprite):
             self.change_occupation(Occupation.RETURNING)  # Biene ist voll und muss in den Bienenstock fliegen
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 
-    def deliver(self, MAX_BEES_SCOUT):  # Futter abgeben
+    def deliver(self):  # Futter abgeben
         if self.capacity != 0:  # Biene hat Futter dabei
             self.hive.deposit(self.capacity, self.dance_information[2])
             self.speed = self.speed + REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit erhöhen wenn Biene kein Futter mehr
@@ -243,28 +241,30 @@ class Bee(pygame.sprite.Sprite):
         elif self.success == 3:
             self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal erfolgreich
 
-        if self.dance_information[3] > 0 and len(
-                self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random():
-            self.dance()
-        else:  # Biene tanzt nicht, dann
+        if self.dance_information[3] > 0:
+            if len(self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random():
+                self.dance()
+            else:  # Biene tanzt nicht, dann
+                # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
+                # desto mehr Scouts)
+                if len(self.hive.bees) > 0:
+                    # Formel aus linearer Interpolation von Lit. Daten abgeleitet
+                    temp_bee_scouts = len(self.hive.bees) * ((-2.046 * (len(self.hive.dance_bees) / len(
+                        self.hive.bees) * 100) + 46.074) / 100)
+                    if len(self.hive.scout_bees) >= temp_bee_scouts:
+                        self.change_occupation(Occupation.ONLOOKER)
+                else:
+                    self.change_occupation(Occupation.EMPLOYED)  # Ansonsten wird Biene wird Scout Biene
+                    # self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
+        else:
             self.reset_dance_information()
-            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
-            if len(self.hive.bees) > 0:
-                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  (len(self.hive.dance_bees) / len(self.hive.bees) * 100) + 46.074) / 100)          #Formel aus linearer Interpolation von Lit. Daten abgeleitet
-                # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
-                if len(self.hive.scout_bees) >= temp_bee_scouts:
-                    self.change_occupation(Occupation.ONLOOKER)
-            else:
-                self.change_occupation(Occupation.EMPLOYED)  # Ansonsten wird Biene wird Scout Biene
-                #self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
-
-        if self.dance_information[3] == 0:
-            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer, desto mehr Scouts)
-            if len(self.hive.bees) > 0:
-                temp_bee_scouts = len(self.hive.bees) * ((-2.046 *  (len(self.hive.dance_bees) / len(self.hive.bees) * 100) + 46.074) / 100)         #Formel aus linearer Interpolation von Lit. Daten abgeleitet
-                # Wenn maximale Anzahl an Scout Bienen erreicht, wird die Biene zur Onlooker Biene
+            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
+            # desto mehr Scouts)
+            # Formel aus linearer Interpolation von Lit. Daten abgeleitet
+            temp_bee_scouts = len(self.hive.bees) * ((-2.046 * (len(self.hive.dance_bees) / len(
+                self.hive.bees) * 100) + 46.074) / 100)
             if len(self.hive.scout_bees) >= temp_bee_scouts:
-                    self.change_occupation(Occupation.ONLOOKER)
+                self.change_occupation(Occupation.ONLOOKER)
             else:
                 self.change_occupation(Occupation.SCOUT)  # Ansonsten wird Biene wird Scout Biene
                 self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
@@ -272,7 +272,10 @@ class Bee(pygame.sprite.Sprite):
     def dance(self):
         self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
         self.dance_counter = 0  # Tanz beginnt von vorne
-        self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
+        self.dancefloor = self.hive.create_dancefloor()
+        self.x = self.dancefloor.x
+        self.y = self.dancefloor.y
+
 
 
 class Occupation(Enum):
