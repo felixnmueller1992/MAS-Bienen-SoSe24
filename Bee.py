@@ -50,6 +50,9 @@ class Bee(pygame.sprite.Sprite):
         self.dance_counter = 0
         self.dance_information = 0, 0, 0, 0
         self.foodsource = None
+        if self.dancefloor is not None:
+            self.hive.remove_dancefloor(self.dancefloor)
+            self.dancefloor = None
 
     def update(self, foodsources):
         self.check_foodsources(foodsources)
@@ -243,7 +246,11 @@ class Bee(pygame.sprite.Sprite):
 
         if self.dance_information[3] > 0:
             if len(self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random():
-                self.dance()
+                self.dancefloor = self.hive.create_dancefloor()
+                if self.dancefloor:
+                    self.dance()
+                else:
+                    self.change_occupation(Occupation.ONLOOKER)
             else:  # Biene tanzt nicht, dann
                 # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
                 # desto mehr Scouts)
@@ -270,12 +277,10 @@ class Bee(pygame.sprite.Sprite):
                 self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
 
     def dance(self):
-        self.change_occupation(Occupation.DANCER)  # Biene wird Tänzer
-        self.dance_counter = 0  # Tanz beginnt von vorne
-        self.dancefloor = self.hive.create_dancefloor()
+        self.change_occupation(Occupation.DANCER)
+        self.dance_counter = 0
         self.x = self.dancefloor.x
         self.y = self.dancefloor.y
-
 
 
 class Occupation(Enum):

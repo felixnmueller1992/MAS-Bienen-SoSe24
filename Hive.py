@@ -87,6 +87,9 @@ class Hive(pygame.sprite.Sprite):
             return new_dancefloor
         return None
 
+    def remove_dancefloor(self, dancefloor):
+        self.dancefloor_list.remove(dancefloor)
+
     def update(self):
         pass
 
