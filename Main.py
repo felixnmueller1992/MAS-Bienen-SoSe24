@@ -57,8 +57,7 @@ def main():
 
     # Verwalte Dancefloors
     dancefloor_group = pygame.sprite.Group()
-    for hive in hive_group:
-        dancefloor_group.add(hive.dancefloor_list)
+
 
     # Erzeuge Bienen
     bee_group = pygame.sprite.Group()
@@ -113,6 +112,11 @@ def main():
         # Bienenstock auf Karte zeichnen
         hive_group.draw(simulation_screen)
         hive_group.update()
+
+        # Update Tanzflächen
+        dancefloor_group.empty()
+        for hive in hive_group:
+            dancefloor_group.add(hive.dancefloor_list)
 
         # Tanzflächen auf Karte zeichnen
         dancefloor_group.draw(simulation_screen)
