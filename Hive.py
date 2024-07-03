@@ -7,7 +7,7 @@ from enum import Enum
 from Color import *
 from Config import *
 
-from Bee import Bee, Occupation
+from Bee import Bee, Occupation, Action
 
 
 # Klasse Bienenstock
@@ -107,6 +107,26 @@ class Dancefloor(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
+
+        self.onlookers = []
+
+    def add_onlooker(self, bee):
+        if len(self.onlookers) < DANCEFLOOR_CAPACITY:
+            for onlooker in self.onlookers:
+                if pygame.sprite.collide_circle(bee, onlooker):
+                    return False
+            self.onlookers.append(bee)
+            bee.watchfloor = self
+            return True
+
+    def remove_onlooker(self, bee):
+        self.onlookers.remove(bee)
+        bee.watchfloor = None
+        bee.action = Action.WANDERING
+
+    def clear_onlookers(self):
+        for onlooker in self.onlookers:
+            self.remove_onlooker(onlooker)
 
     def update(self):
         pass
