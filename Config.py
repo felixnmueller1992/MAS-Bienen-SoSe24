@@ -23,7 +23,7 @@ MAX_STEP_COUNTER_BEES = 1000  # Anzahl Schritte bevor die Biene zurückkehren mu
 
 # Parameter Schwänzeltanz
 MAX_BEES_TO_EMPLOY = 5  # Anzahl an Bienen die von einer Biene rekrutiert werden können
-MAX_DANCE_COUNTER = 500  # Dauer des Schwänzeltanz
+MAX_DANCE_COUNTER = 180  # Dauer des Schwänzeltanz
 DANCEFLOOR_RADIUS = 8  # Radius einer einzelnen Tanzfläche
 DANCEFLOOR_CAPACITY = 5  # Maximale Anzahl von Bienen die gleichzeitig zuschauen kann
 
