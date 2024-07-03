@@ -19,6 +19,7 @@ class Bee(pygame.sprite.Sprite):
         self.hive = hive
         self.occupation = None  # Occupation muss initialisiert werden
         self.change_occupation(occupation)
+        self.action = None
         self.speed = random.randint(MIN_VELOCITY_BEE, MAX_VELOCITY_BEE)  # Zufällige Geschwindigkeit
         self.orientation = random.uniform(0.0, 360.0)  # Zufällige Start-Orientierung
 
@@ -38,10 +39,13 @@ class Bee(pygame.sprite.Sprite):
         self.capacity = 0  # Aktuelle tragende Nahrungsanzahl der Biene
         self.foodsource = None  # Futterquelle an der die Biene employed ist oder die sie gefunden hat
 
+        # Onlooker Attribute
+        self.watchfloor = None
+
         # Tänzer Attribute
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
-        self.dance_information = 0.0, 0.0, 0, 0  # Koordinaten X/Y, Zuckergehalt und übrige Menge der gefundenen Nahrung
-        self.amount_employed = 0  # Wie viele Bienen hat diese Biene rekrutiert
+        self.dance_information = 0.0, 0.0, 0, 0  # TODO Entfernen
+        self.amount_employed = 0  # TODO Entfernen
         self.dance_probability = 0  # Tanzwahrscheinlichkeit
         self.dancefloor = None
 
@@ -51,6 +55,7 @@ class Bee(pygame.sprite.Sprite):
         self.dance_information = 0, 0, 0, 0
         self.foodsource = None
         if self.dancefloor is not None:
+            self.dancefloor.clear_onlookers()
             self.hive.remove_dancefloor(self.dancefloor)
             self.dancefloor = None
 
@@ -110,8 +115,15 @@ class Bee(pygame.sprite.Sprite):
                     self.steps = MAX_STEP_COUNTER_BEES - 150
                     self.reset_dance_information()
             case Occupation.ONLOOKER:
-                for dancefloor in self.hive.dancefloor_list:
-                    if pygame.sprite.collide_circle(self, dancefloor):
+                match self.action:
+                    case Action.LOOKING:
+                        if self.watchfloor is None:
+                            self.action = Action.WANDERING
+                    case _:
+                        for dancefloor in self.hive.dancefloor_list:
+                            if pygame.sprite.collide_circle(self, dancefloor):
+                                if dancefloor.add_onlooker(self):
+                                    self.action = Action.LOOKING
                         pass
             case Occupation.RETURNING:
                 if pygame.sprite.collide_circle(self, self.hive):
@@ -142,12 +154,13 @@ class Bee(pygame.sprite.Sprite):
                 self.orientate_towards(self.foodsource)
             case Occupation.ONLOOKER:
                 # Winkel zum Bienenstock berechnen
-                if not self.is_in_hive():
-                    # Lässt die Biene umdrehen
-                    self.orientation = self.orientation + 180
-                    self.orientation = self.orientation % (2 * math.pi)
-                else:
-                    self.orientation = self.orientation + random.uniform(-0.2, 0.2)
+                if self.action is not Action.LOOKING:
+                    if not self.is_in_hive():
+                        # Lässt die Biene umdrehen
+                        self.orientation = self.orientation + 180
+                        self.orientation = self.orientation % (2 * math.pi)
+                    else:
+                        self.orientation = self.orientation + random.uniform(-0.2, 0.2)
             case Occupation.RETURNING:
                 # Winkel zum Bienenstock berechnen
                 self.orientate_towards(self.hive)
@@ -175,12 +188,13 @@ class Bee(pygame.sprite.Sprite):
 
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
-        if self.occupation == Occupation.ONLOOKER:
-            self.x += math.cos(self.orientation) * WALKING_SPEED
-            self.y += math.sin(self.orientation) * WALKING_SPEED
-        else:
-            self.x += math.cos(self.orientation) * self.speed / 100
-            self.y += math.sin(self.orientation) * self.speed / 100
+        if self.action is not Action.LOOKING:
+            if self.occupation == Occupation.ONLOOKER:
+                self.x += math.cos(self.orientation) * WALKING_SPEED
+                self.y += math.sin(self.orientation) * WALKING_SPEED
+            else:
+                self.x += math.cos(self.orientation) * self.speed / 100
+                self.y += math.sin(self.orientation) * self.speed / 100
 
         if self.occupation is Occupation.SCOUT:
             self.steps = self.steps + 1  # Schritt counter um 1 addieren
@@ -207,6 +221,7 @@ class Bee(pygame.sprite.Sprite):
                 self.hive.employed_bees.remove(self)
             case Occupation.ONLOOKER:
                 self.hive.onlooker_bees.remove(self)
+                self.action = None  # TODO Entfernen wenn Rekrutierungsvorgehen angepasst wird
             case Occupation.DANCER:
                 self.hive.dance_bees.remove(self)
         self.occupation = occupation
