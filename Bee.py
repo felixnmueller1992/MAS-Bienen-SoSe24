@@ -273,8 +273,8 @@ class Bee(pygame.sprite.Sprite):
             if len(self.hive.scout_bees) >= temp_bee_scouts:
                 self.change_occupation(Occupation.ONLOOKER)
             else:
-                self.change_occupation(Occupation.SCOUT)  # Ansonsten wird Biene wird Scout Biene
-                self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
+                self.change_occupation(Occupation.SCOUT)
+                self.orientation = random.uniform(0.0, 360.0)
 
     def dance(self):
         self.change_occupation(Occupation.DANCER)
@@ -289,3 +289,12 @@ class Occupation(Enum):
     ONLOOKER = 2
     RETURNING = 3
     DANCER = 4
+
+
+class Action(Enum):
+    SCOUTING = 0
+    WANDERING = 1
+    LOOKING = 2
+    RETURNING = 3
+    DANCING = 4
+    FORAGING = 5
