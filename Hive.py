@@ -78,11 +78,11 @@ class Hive(pygame.sprite.Sprite):
                 return True
         return False
 
-    def create_dancefloor(self):
+    def create_dancefloor(self, dancer):
         position = self.find_dancefloor_position()
         if position:
             x, y = position
-            new_dancefloor = Dancefloor(x, y)
+            new_dancefloor = Dancefloor(x, y, dancer)
             self.dancefloor_list.append(new_dancefloor)
             return new_dancefloor
         return None
@@ -96,7 +96,7 @@ class Hive(pygame.sprite.Sprite):
 
 # Klasse für Tanzflächen im Hive
 class Dancefloor(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, dancer):
         super().__init__()
         self.x = x
         self.y = y
@@ -108,6 +108,7 @@ class Dancefloor(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
 
+        self.dancer = dancer
         self.onlookers = []
 
     def add_onlooker(self, bee):
@@ -124,9 +125,10 @@ class Dancefloor(pygame.sprite.Sprite):
         bee.watchfloor = None
         bee.action = Action.WANDERING
 
-    def clear_onlookers(self):
+    def clear_bees(self):
         for onlooker in self.onlookers:
             self.remove_onlooker(onlooker)
+        self.dancer = None
 
     def update(self):
         pass

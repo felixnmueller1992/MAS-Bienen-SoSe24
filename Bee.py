@@ -55,7 +55,7 @@ class Bee(pygame.sprite.Sprite):
         self.dance_information = 0, 0, 0, 0
         self.foodsource = None
         if self.dancefloor is not None:
-            self.dancefloor.clear_onlookers()
+            self.dancefloor.clear_bees()
             self.hive.remove_dancefloor(self.dancefloor)
             self.dancefloor = None
 
@@ -117,14 +117,19 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.ONLOOKER:
                 match self.action:
                     case Action.LOOKING:
-                        if self.watchfloor is None:
-                            self.action = Action.WANDERING
+                        # Rekrutierung
+                        if self.watchfloor.dancer is not None:
+                            if random.random() > 0.99:
+                                self.dance_information = self.watchfloor.dancer.dance_information
+                                self.foodsource = self.watchfloor.dancer.foodsource
+                                self.watchfloor.remove_onlooker(self)
+                                self.change_occupation(Occupation.EMPLOYED)
                     case _:
                         for dancefloor in self.hive.dancefloor_list:
                             if pygame.sprite.collide_circle(self, dancefloor):
                                 if dancefloor.add_onlooker(self):
                                     self.action = Action.LOOKING
-                        pass
+                                    self.orientate_towards(self.watchfloor)
             case Occupation.RETURNING:
                 if pygame.sprite.collide_circle(self, self.hive):
                     self.x = self.hive.x
@@ -132,15 +137,7 @@ class Bee(pygame.sprite.Sprite):
                     self.steps = 0  # Schritt Counter zurücksetzen
                     self.deliver()  # Biene ist im Stock
             case Occupation.DANCER:
-                for onlooker in self.hive.onlooker_bees:  # Schleife um Bienen in der Nähe der tanzen Biene zu finden
-                    if self.amount_employed < min(self.dance_information[2], self.dance_information[3]):
-                        # Biene ist Onlooker und es dürfen so viele Bienen rekrutiert werden, wie der Zuckergehalt der
-                        onlooker.dance_information = self.dance_information
-                        onlooker.foodsource = self.foodsource
-                        onlooker.change_occupation(Occupation.EMPLOYED)
-                        self.amount_employed = self.amount_employed + 1
                 self.dance_counter = self.dance_counter + 1
-                # Ende des Schwänzeltanz
                 if self.dance_counter == MAX_DANCE_COUNTER:
                     self.change_occupation(Occupation.ONLOOKER)
                     self.reset_dance_information()
@@ -261,7 +258,7 @@ class Bee(pygame.sprite.Sprite):
 
         if self.dance_information[3] > 0:
             if len(self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random():
-                self.dancefloor = self.hive.create_dancefloor()
+                self.dancefloor = self.hive.create_dancefloor(self)
                 if self.dancefloor:
                     self.dance()
                 else:
