@@ -37,24 +37,60 @@ class Bee(pygame.sprite.Sprite):
 
         # Sammler-/Employed Bee Attribute
         self.capacity = 0  # Aktuelle tragende Nahrungsanzahl der Biene
-        self.foodsource = None  # Futterquelle an der die Biene employed ist oder die sie gefunden hat
+        self.foodsource = None
 
         # Onlooker Attribute
         self.watchfloor = None
 
         # Tänzer Attribute
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
-        self.dance_information = 0.0, 0.0, 0, 0  # TODO Entfernen
+        self.foodsource_pos = (0, 0)
+        self.foodsource_sugar = 0
+        self.foodsource_units = 0
         self.amount_employed = 0  # TODO Entfernen
         self.dance_probability = 0  # Tanzwahrscheinlichkeit
         self.dancefloor = None
 
     # Util Methoden - ab hier folgen Methoden die Berechnung vereinfachen etc.
+    def check_for_dance(self):
+        if self.foodsource_units < 0:
+            return False
+        if len(self.hive.dance_bees) >= MAX_BEES_DANCER:
+            return False
+        if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
+            self.dance_probability = 0.4
+        elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
+            self.dance_probability = 0.6
+        elif self.success == 3:
+            self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
+
+        if self.dance_probability >= random.random():
+            return True
+
+        return False
+
+    def check_for_return(self):
+        if self.occupation is Occupation.SCOUT and self.foodsource is not None:
+            return True
+        return False
+
+    def check_for_scout(self):
+        if len(self.hive.bees) > 0:
+            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
+            # desto mehr Scouts)
+            # Formel aus linearer Interpolation von Lit. Daten abgeleitet
+            temp_bee_scouts = len(self.hive.bees) * ((-2.046 * (len(self.hive.dance_bees) / len(
+                self.hive.bees) * 100) + 46.074) / 100)
+            if len(self.hive.scout_bees) < temp_bee_scouts:
+                return True
+        return False
+
     def reset_dance_information(self):
         self.amount_employed = 0
         self.dance_counter = 0
-        self.dance_information = 0, 0, 0, 0
-        self.foodsource = None
+        self.foodsource_pos = (0, 0)
+        self.foodsource_sugar = 0
+        self.foodsource_units = 0
         if self.dancefloor is not None:
             self.dancefloor.clear_bees()
             self.hive.remove_dancefloor(self.dancefloor)
@@ -95,70 +131,62 @@ class Bee(pygame.sprite.Sprite):
                 self.action = Action.WANDERING
             case Occupation.DANCER:
                 self.hive.dance_bees.add(self)
-                self.action = Action.DANCING
+                self.action = Action.WAITING
 
     # Aktionen - ab hier folgen Methoden die Aktionen der Biene beschreiben
     def harvest(self, food_harvested, food):  # Futter ernten
         self.capacity = self.capacity + food_harvested  # Anzahl Futter erhöhen
-        self.dance_information = food.x, food.y, food.sugar, food.units
+        self.foodsource_pos = (food.x, food.y)
+        self.foodsource_sugar = food.sugar
+        self.foodsource_units = food.units
         self.foodsource = food
         if self.capacity >= BEE_MAX_CAPACITY:
             self.capacity = BEE_MAX_CAPACITY  # Futtermenge begrenzen
             self.action = Action.RETURNING
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 
-    def deliver(self):  # Futter abgeben
-        if self.capacity != 0:  # Biene hat Futter dabei
-            self.hive.deposit(self.capacity, self.dance_information[2])
-            self.speed = self.speed + REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit erhöhen wenn Biene kein Futter mehr
-            # trägt
-        self.capacity = 0  # Nahrung wird von Biene entfernt
+    def deliver(self):
+        # Futter abgeben
+        if self.capacity != 0:
+            self.hive.deposit(self.capacity, self.foodsource_sugar)
+            self.speed = self.speed + REDUCE_SPEED_WHEN_CARRY
+        self.capacity = 0
 
-        # TODO Hier Formel zur Auswertung der Güte der Futterquelle -> Soll Biene Tanzen oder nicht? #####
-        if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
-            self.dance_probability = 0.4
-        elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
-            self.dance_probability = 0.6
-        elif self.success == 3:
-            self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal erfolgreich
-
-        if self.dance_information[3] > 0:
-            if len(self.hive.dance_bees) < MAX_BEES_DANCER and self.dance_probability >= random.random():
-                self.dancefloor = self.hive.create_dancefloor(self)
-                if self.dancefloor:
-                    self.dance()
-                else:
-                    self.change_occupation(Occupation.ONLOOKER)
-            else:  # Biene tanzt nicht, dann
-                # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
-                # desto mehr Scouts)
-                if len(self.hive.bees) > 0:
-                    # Formel aus linearer Interpolation von Lit. Daten abgeleitet
-                    temp_bee_scouts = len(self.hive.bees) * ((-2.046 * (len(self.hive.dance_bees) / len(
-                        self.hive.bees) * 100) + 46.074) / 100)
-                    if len(self.hive.scout_bees) >= temp_bee_scouts:
-                        self.change_occupation(Occupation.ONLOOKER)
-                else:
-                    self.change_occupation(Occupation.EMPLOYED)  # Ansonsten wird Biene wird Scout Biene
-                    # self.orientation = random.uniform(0.0, 360.0)  # Zufällige Orientierung
-        else:
-            self.reset_dance_information()
-            # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
-            # desto mehr Scouts)
-            # Formel aus linearer Interpolation von Lit. Daten abgeleitet
-            temp_bee_scouts = len(self.hive.bees) * ((-2.046 * (len(self.hive.dance_bees) / len(
-                self.hive.bees) * 100) + 46.074) / 100)
-            if len(self.hive.scout_bees) >= temp_bee_scouts:
-                self.change_occupation(Occupation.ONLOOKER)
+        # Tanz checken
+        if self.check_for_dance():
+            self.change_occupation(Occupation.DANCER)
+            self.dancefloor = self.hive.create_dancefloor(self)
+            if self.dancefloor:
+                self.dance(MAX_DANCE_COUNTER)
             else:
-                self.change_occupation(Occupation.SCOUT)
-                self.orientation = random.uniform(0.0, 360.0)
+                print(f'Konnte keine freie Tanzfläche finden.')
+                self.change_occupation(Occupation.EMPLOYED)
+        # Prüfen ob Biene zur gleichen Futterquelle zurückfliegt
+        elif self.check_for_return():
+            if self.occupation is Occupation.SCOUT:
+                self.change_occupation(Occupation.EMPLOYED)
+        # Prüfen ob Biene Scout werden kann
+        elif self.check_for_scout():
+            self.change_occupation(Occupation.SCOUT)
+            self.orientation = random.uniform(0.0, 360.0)
+            self.reset_dance_information()
+        else:
+            self.change_occupation(Occupation.ONLOOKER)
 
-    def dance(self):
-        self.change_occupation(Occupation.DANCER)
-        self.dance_counter = 0
+    def dance(self, time):
+        self.action = Action.DANCING
+        self.dance_counter = time
         self.x = self.dancefloor.x
         self.y = self.dancefloor.y
+
+    def employ(self):
+        dancer = self.watchfloor.dancer
+        self.foodsource_pos = dancer.foodsource_pos
+        self.foodsource_sugar = dancer.foodsource_sugar
+        self.foodsource_units = dancer.foodsource_units
+        self.foodsource = dancer.foodsource
+        self.watchfloor.remove_onlooker(self)
+        self.change_occupation(Occupation.EMPLOYED)
 
     # Update Methoden - ab hier folgen alle Methoden, die mit dem Update zutun haben
     def update(self, foodsources):
@@ -208,9 +236,7 @@ class Bee(pygame.sprite.Sprite):
                             # Biene fliegt zurück zum Bienenstock, weil Futterquelle leer ist // oder Scout?
                             # self.change_occupation(Occupation.SCOUT)
                             self.action = Action.SCOUTING
-                            # Sammelerfolg wird zurück auf 0 gesetzt
                             self.success = 0
-                            # Schrittzähler wird erhöht, sodass Scout Biene nur kurz die Umgebung absucht
                             self.steps = MAX_STEP_COUNTER_BEES - 150
                             self.reset_dance_information()
                     case Action.SCOUTING:
@@ -224,10 +250,7 @@ class Bee(pygame.sprite.Sprite):
                     case Action.LOOKING:
                         if self.watchfloor.dancer is not None:
                             if random.random() > 0.99:
-                                self.dance_information = self.watchfloor.dancer.dance_information
-                                self.foodsource = self.watchfloor.dancer.foodsource
-                                self.watchfloor.remove_onlooker(self)
-                                self.change_occupation(Occupation.EMPLOYED)
+                                self.employ()
                         else:
                             self.action = Action.WANDERING
                     case Action.WANDERING:
@@ -247,10 +270,12 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.DANCER:
                 match self.action:
                     case Action.DANCING:
-                        self.dance_counter = self.dance_counter + 1
-                        if self.dance_counter == MAX_DANCE_COUNTER:
+                        self.dance_counter = self.dance_counter - 1
+                        if self.dance_counter <= 0:
                             self.change_occupation(Occupation.ONLOOKER)
                             self.reset_dance_information()
+                    case Action.WAITING:
+                        pass
                     case _:
                         print(f'O:Unbekannte Aktion {self.action} bei Occupation {self.occupation}.')
 
@@ -306,6 +331,8 @@ class Bee(pygame.sprite.Sprite):
                 match self.action:
                     case Action.DANCING:
                         self.orientate_towards(self.dancefloor)
+                    case Action.WAITING:
+                        pass
                     case _:
                         print(f'D:Unbekannte Aktion {self.action} bei Occupation {self.occupation}.')
 
@@ -347,8 +374,8 @@ class Bee(pygame.sprite.Sprite):
             pygame.draw.circle(self.image, COLOR_BEE_ONLOOKER, (self.radius, self.radius), 2)
         elif self.occupation == Occupation.RETURNING:  # Biene fliegt zurück zum Bienenstock
             pygame.draw.circle(self.image, DARK_GREEN, (self.radius, self.radius), 4)
-        elif self.occupation == Occupation.DANCER:  # Biene tanzt
-            pygame.draw.circle(self.image, COLOR_BEE_DANCER, (self.radius, self.radius), 6)
+        elif self.occupation == Occupation.DANCER and self.action is not Action.WAITING:  # Biene tanzt
+            pygame.draw.circle(self.image, COLOR_BEE_DANCER, (self.radius, self.radius), 2)
 
 
 class Occupation(Enum):
@@ -363,6 +390,7 @@ class Action(Enum):
     SCOUTING = 0
     WANDERING = 1
     LOOKING = 2
-    RETURNING = 3
-    DANCING = 4
-    FORAGING = 5
+    FORAGING = 3
+    RETURNING = 4
+    DANCING = 5
+    WAITING = 6
