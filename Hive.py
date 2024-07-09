@@ -124,6 +124,7 @@ class Dancefloor(pygame.sprite.Sprite):
         self.onlookers.remove(bee)
         bee.watchfloor = None
         bee.action = Action.WANDERING
+        # bee.evaluate_dance()
 
     def clear_bees(self):
         for onlooker in self.onlookers:
