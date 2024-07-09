@@ -47,9 +47,12 @@ class Bee(pygame.sprite.Sprite):
         self.foodsource_pos = (0, 0)
         self.foodsource_sugar = 0
         self.foodsource_units = 0
-        self.amount_employed = 0  # TODO Entfernen
         self.dance_probability = 0  # Tanzwahrscheinlichkeit
         self.dancefloor = None
+        self.start_point = None
+        self.end_point = None
+        self.return_angle = 0
+        self.dance_direction = True
 
     # Util Methoden - ab hier folgen Methoden die Berechnung vereinfachen etc.
     def check_for_dance(self):
@@ -86,15 +89,16 @@ class Bee(pygame.sprite.Sprite):
         return False
 
     def reset_dance_information(self):
-        self.amount_employed = 0
         self.dance_counter = 0
-        self.foodsource_pos = (0, 0)
+        self.foodsource_pos = None
         self.foodsource_sugar = 0
         self.foodsource_units = 0
         if self.dancefloor is not None:
             self.dancefloor.clear_bees()
             self.hive.remove_dancefloor(self.dancefloor)
             self.dancefloor = None
+            self.start_point = None
+            self.end_point = None
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
@@ -132,6 +136,34 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.DANCER:
                 self.hive.dance_bees.add(self)
                 self.action = Action.WAITING
+
+    def dance_orientation(self):
+        current_pos = pygame.math.Vector2(self.x, self.y)
+
+        if self.action is Action.DANCE_WAGGLE:
+            self.orientate_towards(self.end_point)
+            if current_pos.distance_to(self.end_point) < 1:
+                self.action = Action.DANCE_RETURN
+                self.return_angle = 0
+        else:
+            if self.dance_direction:
+                self.return_angle -= 5
+            else:
+                self.return_angle += 5
+
+            circle_center = (self.start_point + self.end_point) / 2
+            radius_vector = (self.end_point - self.start_point) / 2
+
+            target = circle_center + radius_vector.rotate(self.return_angle)
+
+            if self.return_angle <= -180 or self.return_angle >= 180:
+                self.action = Action.DANCE_WAGGLE
+                self.dance_direction = not self.dance_direction
+                self.orientate_towards(self.end_point)
+            else:
+                direction = target - current_pos
+                if direction.length() > 0:
+                    self.orientation = math.atan2(direction.y, direction.x)
 
     # Aktionen - ab hier folgen Methoden die Aktionen der Biene beschreiben
     def harvest(self, food_harvested, food):  # Futter ernten
@@ -174,10 +206,19 @@ class Bee(pygame.sprite.Sprite):
             self.change_occupation(Occupation.ONLOOKER)
 
     def dance(self, time):
-        self.action = Action.DANCING
+        self.action = Action.DANCE_WAGGLE
         self.dance_counter = time
-        self.x = self.dancefloor.x
-        self.y = self.dancefloor.y
+        # Positionen für Tanz bestimmen
+        dancefloor_vec = pygame.math.Vector2(self.dancefloor.rect.center)
+        foodsource_vec = pygame.math.Vector2(self.foodsource.x, self.foodsource.y) - dancefloor_vec
+        self.start_point = dancefloor_vec - foodsource_vec.normalize() * self.dancefloor.radius
+        self.end_point = dancefloor_vec + foodsource_vec.normalize() * self.dancefloor.radius
+        self.x = self.start_point.x
+        self.y = self.start_point.y
+
+    def evaluate_dance(self):
+        if random.random() > 0.99:
+            self.employ()
 
     def employ(self):
         dancer = self.watchfloor.dancer
@@ -249,8 +290,8 @@ class Bee(pygame.sprite.Sprite):
                 match self.action:
                     case Action.LOOKING:
                         if self.watchfloor.dancer is not None:
-                            if random.random() > 0.99:
-                                self.employ()
+                            # TODO Onlooker muss hier noch Infos sammeln
+                            self.evaluate_dance()
                         else:
                             self.action = Action.WANDERING
                     case Action.WANDERING:
@@ -269,7 +310,7 @@ class Bee(pygame.sprite.Sprite):
                     self.deliver()  # Biene ist im Stock
             case Occupation.DANCER:
                 match self.action:
-                    case Action.DANCING:
+                    case Action.DANCE_WAGGLE | Action.DANCE_RETURN:
                         self.dance_counter = self.dance_counter - 1
                         if self.dance_counter <= 0:
                             self.change_occupation(Occupation.ONLOOKER)
@@ -329,8 +370,8 @@ class Bee(pygame.sprite.Sprite):
                 self.orientate_towards(self.hive)
             case Occupation.DANCER:
                 match self.action:
-                    case Action.DANCING:
-                        self.orientate_towards(self.dancefloor)
+                    case Action.DANCE_WAGGLE | Action.DANCE_RETURN:
+                        self.dance_orientation()
                     case Action.WAITING:
                         pass
                     case _:
@@ -352,8 +393,8 @@ class Bee(pygame.sprite.Sprite):
 
     def update_movement(self):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
-        if self.action is not Action.LOOKING:
-            if self.occupation == Occupation.ONLOOKER:
+        if self.action is not Action.LOOKING and self.action is not Action.WAITING:
+            if self.occupation is Occupation.ONLOOKER or self.occupation is Occupation.DANCER:
                 self.x += math.cos(self.orientation) * WALKING_SPEED
                 self.y += math.sin(self.orientation) * WALKING_SPEED
             else:
@@ -392,5 +433,6 @@ class Action(Enum):
     LOOKING = 2
     FORAGING = 3
     RETURNING = 4
-    DANCING = 5
-    WAITING = 6
+    DANCE_WAGGLE = 5
+    DANCE_RETURN = 6
+    WAITING = 7
