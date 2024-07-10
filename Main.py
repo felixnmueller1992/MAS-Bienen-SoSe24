@@ -10,6 +10,7 @@ from DataExport import *
 
 file_date = time.strftime("%Y%m%d_%H%M%S")
 
+
 # Hauptfunktion
 def main():
     pygame.init()
@@ -22,7 +23,7 @@ def main():
 
     # Initialisiere alle Objekte für Simulation
 
-    if len(IMPORT_ENVIRONMENT_FILE) > 0:       # Falls file import gewünscht
+    if len(IMPORT_ENVIRONMENT_FILE) > 0:  # Falls file import gewünscht
         hive_group = pygame.sprite.Group()
         foodsource_group = pygame.sprite.Group()
 
@@ -33,11 +34,11 @@ def main():
                 hive_group.add(hive)
 
             if row['Object'] == "Foodsource":
-                food = Foodsource(row['Units'], row['Sugar'], row['X_cord'], row['Y_cord']) 
+                food = Foodsource(row['Units'], row['Sugar'], row['X_cord'], row['Y_cord'])
                 foodsource_group.add(food)
-        
-    else:                                       # Zufällige initialisierung falls kein file import gewünscht
-        
+
+    else:  # Zufällige initialisierung, falls kein file import gewünscht
+
         hivePosX = SIMULATION_WIDTH / random.randint(2, 4)
         hivePosY = SCREEN_HEIGHT / random.randint(2, 4)
 
@@ -49,33 +50,35 @@ def main():
         # Erzeuge Futterquellen
         foodsource_group = pygame.sprite.Group()
         foods = [
-            Foodsource(random.randint(MIN_UNITS, MAX_UNITS), random.randint(MIN_SUGAR, MAX_SUGAR), MIN_RANGE_FOOD_TO_HIVE,
-                    hivePosX, hivePosY) for _ in range(FOOD_COUNT)]
+            Foodsource(random.randint(MIN_UNITS, MAX_UNITS), random.randint(MIN_SUGAR, MAX_SUGAR),
+                       MIN_RANGE_FOOD_TO_HIVE,
+                       hivePosX, hivePosY) for _ in range(FOOD_COUNT)]
         foodsource_group.add(foods)
+
+    # Verwalte Dancefloors
+    dancefloor_group = pygame.sprite.Group()
 
 
     # Erzeuge Bienen
-    bees = hive.create_bees()
     bee_group = pygame.sprite.Group()
-    bee_group.add(bees)
+    for hive in hive_group:
+        bee_group.add(hive.create_bees())
 
     total_food_amount = 0
 
-        # Alle Units der Futterquellen zusammenzählen
+    # Alle Units der Futterquellen zusammenzählen
     for foodsource in foodsource_group:
         total_food_amount = total_food_amount + (foodsource.units * foodsource.sugar)
 
-
-    if EXPORT_ENVIRONMENT == True:
+    if EXPORT_ENVIRONMENT:
 
         for hive in hive_group:
-            environment_data = ["Hive", "N/A" , "N/A", hive.x, hive.y]
-            export_szenario(environment_data,file_date)
+            environment_data = ["Hive", "N/A", "N/A", hive.x, hive.y]
+            export_szenario(environment_data, file_date)
 
         for foodsource in foodsource_group:
-            environment_data = ["Foodsource",foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
-            export_szenario(environment_data,file_date)
-            
+            environment_data = ["Foodsource", foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
+            export_szenario(environment_data, file_date)
 
     # Timer-Setup für Dateiexport/Plot
     export_data_event = pygame.USEREVENT + 1
@@ -84,22 +87,22 @@ def main():
 
     # Hauptschleife
     running = True
-    while running:  
-        #telemetry_df_temp = pd.DataFrame() 
-        for event in pygame.event.get(): 
+    while running:
+        # telemetry_df_temp = pd.DataFrame()
+        for event in pygame.event.get():
             # Abtasten von Daten für Datenexport und Analysen
             if event.type == export_data_event:
                 telemetry_df_temp = daten_exportieren(hive_group, bee_group, total_food_amount)
-                telemetry_df = pd.concat([telemetry_df,telemetry_df_temp])
-                
+                telemetry_df = pd.concat([telemetry_df, telemetry_df_temp])
+
             if event.type == pygame.QUIT:
-                if EXPORT_SIMULATION == True:
-                    telemetry_df.to_excel(file_date +"_Simulationsdaten.xlsx", index=False)
-                running = False   
-            
+                if EXPORT_SIMULATION:
+                    telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
+                running = False
+
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
-            if EXPORT_SIMULATION == True:
-                telemetry_df.to_excel(file_date +"_Simulationsdaten.xlsx", index=False)
+            if EXPORT_SIMULATION:
+                telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
             running = False
 
         # Hintergrund zeichnen
@@ -110,6 +113,15 @@ def main():
         hive_group.draw(simulation_screen)
         hive_group.update()
 
+        # Update Tanzflächen
+        dancefloor_group.empty()
+        for hive in hive_group:
+            dancefloor_group.add(hive.dancefloor_list)
+
+        # Tanzflächen auf Karte zeichnen
+        dancefloor_group.draw(simulation_screen)
+        dancefloor_group.update()
+
         # Futterquellen auf Karte zeichnen
         foodsource_group.draw(simulation_screen)
         foodsource_group.update()
@@ -117,10 +129,10 @@ def main():
         # Bienen auf Karte zeichnen
         bee_group.draw(simulation_screen)
         bee_group.update(foodsource_group)
-        
-        # Legende auf die Map zeichnen                     
-        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)   
-        
+
+        # Legende auf die Map zeichnen
+        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)
+
         # Simulation auf den darunterliegenden Screen zeichnen
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
 
