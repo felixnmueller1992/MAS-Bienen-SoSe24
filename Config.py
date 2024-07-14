@@ -21,10 +21,10 @@ REDUCE_SPEED_WHEN_CARRY = 15  # Reduktion der Geschwindigkeit, wenn die Biene Na
 MAX_STEP_COUNTER_BEES = 1000  # Anzahl Schritte bevor die Biene zurückkehren muss
 
 # Parameter Schwänzeltanz
-MAX_BEES_TO_EMPLOY = 5  # Anzahl an Bienen die von einer Biene rekrutiert werden können
 MAX_DANCE_COUNTER = 180  # Dauer des Schwänzeltanz
 DANCEFLOOR_RADIUS = 8  # Radius einer einzelnen Tanzfläche
 DANCEFLOOR_CAPACITY = 5  # Maximale Anzahl von Bienen die gleichzeitig zuschauen kann
+MIN_DANCE_PROBABILITY = 0.05  # Minimale Wahrscheinlichkeit mit der eine Biene für eine Quelle tanzt
 
 # Bildschirmgröße
 # Technische Parameter

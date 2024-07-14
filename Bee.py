@@ -60,15 +60,23 @@ class Bee(pygame.sprite.Sprite):
             return False
         if len(self.hive.dance_bees) >= MAX_BEES_DANCER:
             return False
-        if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
-            self.dance_probability = 0.4
-        elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
-            self.dance_probability = 0.6
-        elif self.success == 3:
-            self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
 
-        if self.dance_probability >= random.random():
+        # Berechnung der Tanzwahrscheinlichkeit anhand des Zuckergehaltes
+        dance_prob = (MIN_DANCE_PROBABILITY + (1 - MIN_DANCE_PROBABILITY)
+                      * (self.foodsource_sugar - MIN_SUGAR) / (MAX_SUGAR - MIN_SUGAR))
+
+        if dance_prob >= random.random():
             return True
+
+        # if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
+        #     self.dance_probability = 0.4
+        # elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
+        #     self.dance_probability = 0.6
+        # elif self.success == 3:
+        #     self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
+        #
+        # if self.dance_probability >= random.random():
+        #     return True
 
         return False
 
