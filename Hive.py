@@ -45,7 +45,6 @@ class Hive(pygame.sprite.Sprite):
         match self.algorithm:
             case Algorithm.ABC:
                 self.bees.add([Bee(Occupation.SCOUT, self) for _ in range(BEES_SCOUT)])
-                self.bees.add([Bee(Occupation.EMPLOYED, self) for _ in range(BEES_EMPLOYED)])
                 self.bees.add([Bee(Occupation.ONLOOKER, self) for _ in range(BEES_ONLOOKER)])
                 return self.bees
             case Algorithm.BEE:
