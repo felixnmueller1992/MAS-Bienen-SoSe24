@@ -98,15 +98,18 @@ class Bee(pygame.sprite.Sprite):
 
     def reset_dance_information(self):
         self.dance_counter = 0
-        self.foodsource_pos = None
-        self.foodsource_sugar = 0
-        self.foodsource_units = 0
         if self.dancefloor is not None:
             self.dancefloor.clear_bees()
             self.hive.remove_dancefloor(self.dancefloor)
             self.dancefloor = None
             self.start_point = None
             self.end_point = None
+
+    def reset_foodsource_information(self):
+        self.foodsource_pos = None
+        self.foodsource_sugar = 0
+        self.foodsource_units = 0
+        self.foodsource = None
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
@@ -209,10 +212,10 @@ class Bee(pygame.sprite.Sprite):
         # Prüfen ob Biene Scout werden kann
         elif self.check_for_scout():
             self.change_occupation(Occupation.SCOUT)
-            self.orientation = random.uniform(0.0, 360.0)
-            self.reset_dance_information()
+            self.reset_foodsource_information()
         else:
             self.change_occupation(Occupation.ONLOOKER)
+            self.reset_foodsource_information()
 
     def dance(self):
         self.action = Action.DANCE_WAGGLE
@@ -290,7 +293,7 @@ class Bee(pygame.sprite.Sprite):
                             self.action = Action.SCOUTING
                             self.success = 0
                             self.steps = MAX_STEP_COUNTER_BEES - 150
-                            self.reset_dance_information()
+                            self.reset_foodsource_information()
                     case Action.SCOUTING:
                         self.update_occupation_scouting()
                     case Action.RETURNING:
@@ -325,7 +328,6 @@ class Bee(pygame.sprite.Sprite):
                         self.dance_counter = self.dance_counter - 1
                         if self.dance_counter <= 0:
                             self.change_occupation(Occupation.EMPLOYED)
-                            # TODO Aufspalten der Methode?
                             self.reset_dance_information()
                     case Action.WAITING:
                         pass
