@@ -198,7 +198,7 @@ class Bee(pygame.sprite.Sprite):
             self.change_occupation(Occupation.DANCER)
             self.dancefloor = self.hive.create_dancefloor(self)
             if self.dancefloor:
-                self.dance(MAX_DANCE_COUNTER)
+                self.dance()
             else:
                 print(f'Konnte keine freie Tanzfläche finden.')
                 self.change_occupation(Occupation.EMPLOYED)
@@ -214,14 +214,16 @@ class Bee(pygame.sprite.Sprite):
         else:
             self.change_occupation(Occupation.ONLOOKER)
 
-    def dance(self, time):
+    def dance(self):
         self.action = Action.DANCE_WAGGLE
-        self.dance_counter = time
+        distance = math.hypot(self.dancefloor.x - self.foodsource_pos[0], self.dancefloor.y - self.foodsource_pos[1])
+        self.dance_counter = distance * DANCETIME_PER_UNIT
         # Positionen für Tanz bestimmen
         dancefloor_vec = pygame.math.Vector2(self.dancefloor.rect.center)
-        foodsource_vec = pygame.math.Vector2(self.foodsource.x, self.foodsource.y) - dancefloor_vec
-        self.start_point = dancefloor_vec - foodsource_vec.normalize() * self.dancefloor.radius
-        self.end_point = dancefloor_vec + foodsource_vec.normalize() * self.dancefloor.radius
+        foodsource_vec = pygame.math.Vector2(self.foodsource.x, self.foodsource.y)
+        distance_vec = foodsource_vec - dancefloor_vec
+        self.start_point = dancefloor_vec - distance_vec.normalize() * self.dancefloor.radius
+        self.end_point = dancefloor_vec + distance_vec.normalize() * self.dancefloor.radius
         self.x = self.start_point.x
         self.y = self.start_point.y
 
@@ -322,7 +324,8 @@ class Bee(pygame.sprite.Sprite):
                     case Action.DANCE_WAGGLE | Action.DANCE_RETURN:
                         self.dance_counter = self.dance_counter - 1
                         if self.dance_counter <= 0:
-                            self.change_occupation(Occupation.ONLOOKER)
+                            self.change_occupation(Occupation.EMPLOYED)
+                            # TODO Aufspalten der Methode?
                             self.reset_dance_information()
                     case Action.WAITING:
                         pass

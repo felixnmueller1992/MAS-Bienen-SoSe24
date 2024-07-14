@@ -1,3 +1,10 @@
+# Technische Parameter
+FRAMES_PER_SECOND = 60
+SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1650
+
+SIMULATION_WIDTH = 1400
+
 # Parameter Simulation
 BEES_SCOUT = 20  # Anzahl Scout Bienen im System zum Start
 BEES_ONLOOKER = 200  # Anzahl Onlooker Bienen im System zum Start
@@ -21,18 +28,14 @@ REDUCE_SPEED_WHEN_CARRY = 15  # Reduktion der Geschwindigkeit, wenn die Biene Na
 MAX_STEP_COUNTER_BEES = 1000  # Anzahl Schritte bevor die Biene zurückkehren muss
 
 # Parameter Schwänzeltanz
-MAX_DANCE_COUNTER = 180  # Dauer des Schwänzeltanz
+DANCETIME_PER_UNIT = FRAMES_PER_SECOND / 100  # Anzahl der
 DANCEFLOOR_RADIUS = 8  # Radius einer einzelnen Tanzfläche
 DANCEFLOOR_CAPACITY = 5  # Maximale Anzahl von Bienen die gleichzeitig zuschauen kann
 MIN_DANCE_PROBABILITY = 0.05  # Minimale Wahrscheinlichkeit mit der eine Biene für eine Quelle tanzt
 
-# Bildschirmgröße
-# Technische Parameter
-FRAMES_PER_SECOND = 60
-SCREEN_HEIGHT = 800
-SCREEN_WIDTH = 1650
-
-SIMULATION_WIDTH = 1400
+# Parameter Onlooker
+MAX_DANCES_WATCHED = 8  # Anzahl der Tänze die ein Onlooker maximal schaut
+MIN_DANCES_WATCHED = 5  # Anzahl der Tänze die ein Onlooker mindestens schaut
 
 # Testing
 EXPORT_ENVIRONMENT = False
