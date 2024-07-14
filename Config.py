@@ -27,6 +27,8 @@ DANCEFLOOR_RADIUS = 8  # Radius einer einzelnen Tanzfläche
 DANCEFLOOR_CAPACITY = 5  # Maximale Anzahl von Bienen die gleichzeitig zuschauen kann
 
 # Bildschirmgröße
+# Technische Parameter
+FRAMES_PER_SECOND = 60
 SCREEN_HEIGHT = 800
 SCREEN_WIDTH = 1650
 
