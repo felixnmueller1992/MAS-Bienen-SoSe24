@@ -42,6 +42,7 @@ class Bee(pygame.sprite.Sprite):
 
         # Onlooker Attribute
         self.watchfloor = None
+        self.seen_dances = {}
 
         # Tänzer Attribute
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
@@ -231,8 +232,27 @@ class Bee(pygame.sprite.Sprite):
         self.y = self.start_point.y
 
     def evaluate_dance(self):
-        if random.random() > 0.99:
+        dancer = self.watchfloor.dancer
+        dance = {
+            'foodsource_pos': dancer.foodsource_pos,
+            'foodsource_sugar': dancer.foodsource_sugar,
+            'foodsource_units': dancer.foodsource_units,
+            'foodsource': dancer.foodsource
+        }
+        self.add_dance(dance)
+
+        total_dances = sum(self.seen_dances.values())
+        inter = interpolate(total_dances, MIN_DANCES_WATCHED, MAX_DANCES_WATCHED, 0.5)
+        if inter > random.random():
+            print(f'total_dances={total_dances}, interpolate={inter}')
+            # TODO Wenn genug Tänze gesehen wurden, dann evaluieren
             self.employ()
+        else:
+            self.action = Action.WANDERING
+
+    def add_dance(self, dance):
+        key = str(dance)
+        self.seen_dances[key] = self.seen_dances.get(key, 0) + 1
 
     def employ(self):
         dancer = self.watchfloor.dancer
@@ -240,7 +260,6 @@ class Bee(pygame.sprite.Sprite):
         self.foodsource_sugar = dancer.foodsource_sugar
         self.foodsource_units = dancer.foodsource_units
         self.foodsource = dancer.foodsource
-        self.watchfloor.remove_onlooker(self)
         self.change_occupation(Occupation.EMPLOYED)
 
     # Update Methoden - ab hier folgen alle Methoden, die mit dem Update zutun haben
@@ -303,11 +322,8 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.ONLOOKER:
                 match self.action:
                     case Action.LOOKING:
-                        if self.watchfloor.dancer is not None:
-                            # TODO Onlooker muss hier noch Infos sammeln
-                            self.evaluate_dance()
-                        else:
-                            self.action = Action.WANDERING
+                        # TODO Onlooker muss hier noch Infos sammeln
+                        pass
                     case Action.WANDERING:
                         for dancefloor in self.hive.dancefloor_list:
                             if pygame.sprite.collide_circle(self, dancefloor):
