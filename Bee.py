@@ -4,6 +4,7 @@ import math
 
 from Config import *
 from Color import *
+from Util import *
 
 from enum import Enum
 
@@ -62,8 +63,7 @@ class Bee(pygame.sprite.Sprite):
             return False
 
         # Berechnung der Tanzwahrscheinlichkeit anhand des Zuckergehaltes
-        dance_prob = (MIN_DANCE_PROBABILITY + (1 - MIN_DANCE_PROBABILITY)
-                      * (self.foodsource_sugar - MIN_SUGAR) / (MAX_SUGAR - MIN_SUGAR))
+        dance_prob = interpolate(self.foodsource_sugar, MIN_SUGAR, MAX_SUGAR, MIN_DANCE_PROBABILITY)
 
         if dance_prob >= random.random():
             return True
