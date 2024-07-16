@@ -119,15 +119,10 @@ class Dancefloor(pygame.sprite.Sprite):
             bee.watchfloor = self
             return True
 
-    def remove_onlooker(self, bee):
-        # TODO speichere Informationen aus Tanz
-        bee.evaluate_dance()
-        self.onlookers.remove(bee)
-        bee.watchfloor = None
-
     def clear_bees(self):
         for onlooker in self.onlookers:
-            self.remove_onlooker(onlooker)
+            onlooker.evaluate_dance()
+        self.onlookers.clear()
         self.dancer = None
 
     def update(self):
