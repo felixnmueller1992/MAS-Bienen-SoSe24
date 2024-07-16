@@ -249,7 +249,6 @@ class Bee(pygame.sprite.Sprite):
         inter = interpolate(total_dances, MIN_DANCES_WATCHED, MAX_DANCES_WATCHED, 0.5)
 
         if total_dances >= MIN_DANCES_WATCHED and inter > random.random():
-            print(f'total_dances={total_dances}, interpolate={inter}')
             most_seen = max(self.seen_dances.items(), key=lambda x: x[1]['count'])
             top_dance = most_seen[1]['dance']
             self.employ(top_dance)
