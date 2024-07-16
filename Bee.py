@@ -232,6 +232,10 @@ class Bee(pygame.sprite.Sprite):
         self.y = self.start_point.y
 
     def evaluate_dance(self):
+        if self.watchfloor is None:
+            self.action = Action.WANDERING
+            return
+
         dancer = self.watchfloor.dancer
         dance = {
             'foodsource_pos': dancer.foodsource_pos,
@@ -241,25 +245,31 @@ class Bee(pygame.sprite.Sprite):
         }
         self.add_dance(dance)
 
-        total_dances = sum(self.seen_dances.values())
+        total_dances = sum(d['count'] for d in self.seen_dances.values())
         inter = interpolate(total_dances, MIN_DANCES_WATCHED, MAX_DANCES_WATCHED, 0.5)
-        if inter > random.random():
+
+        if total_dances >= MIN_DANCES_WATCHED and inter > random.random():
             print(f'total_dances={total_dances}, interpolate={inter}')
-            # TODO Wenn genug Tänze gesehen wurden, dann evaluieren
-            self.employ()
+            most_seen = max(self.seen_dances.items(), key=lambda x: x[1]['count'])
+            top_dance = most_seen[1]['dance']
+            self.employ(top_dance)
         else:
             self.action = Action.WANDERING
 
-    def add_dance(self, dance):
-        key = str(dance)
-        self.seen_dances[key] = self.seen_dances.get(key, 0) + 1
+        self.watchfloor = None
 
-    def employ(self):
-        dancer = self.watchfloor.dancer
-        self.foodsource_pos = dancer.foodsource_pos
-        self.foodsource_sugar = dancer.foodsource_sugar
-        self.foodsource_units = dancer.foodsource_units
-        self.foodsource = dancer.foodsource
+    def add_dance(self, dance):
+        foodsource_pos = tuple(dance['foodsource_pos'])
+        if foodsource_pos in self.seen_dances:
+            self.seen_dances[foodsource_pos]['count'] += 1
+        else:
+            self.seen_dances[foodsource_pos] = {'count': 1, 'dance': dance}
+
+    def employ(self, dance):
+        self.foodsource_pos = dance['foodsource_pos']
+        self.foodsource_sugar = dance['foodsource_sugar']
+        self.foodsource_units = dance['foodsource_units']
+        self.foodsource = dance['foodsource']
         self.change_occupation(Occupation.EMPLOYED)
 
     # Update Methoden - ab hier folgen alle Methoden, die mit dem Update zutun haben
@@ -322,7 +332,6 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.ONLOOKER:
                 match self.action:
                     case Action.LOOKING:
-                        # TODO Onlooker muss hier noch Infos sammeln
                         pass
                     case Action.WANDERING:
                         for dancefloor in self.hive.dancefloor_list:
