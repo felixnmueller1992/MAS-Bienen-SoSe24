@@ -174,6 +174,7 @@ class Bee(pygame.sprite.Sprite):
         self.foodsource = food
         if self.capacity >= BEE_MAX_CAPACITY:
             self.capacity = BEE_MAX_CAPACITY  # Futtermenge begrenzen
+        if self.capacity > 0:    
             self.action = Action.RETURNING
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 

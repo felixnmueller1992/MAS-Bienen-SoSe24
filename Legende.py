@@ -29,6 +29,7 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
     screen.blit(food_surface_1, (10, 90))
     screen.blit(food_surface_2, (10, 110))
 
+
     # Zeichne Labels für Legende
     total_scouts = 0
     total_employed = 0
@@ -72,3 +73,5 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
         screen.blit(color_surface, (190, y_offset))
 
         y_offset += 30
+
+
