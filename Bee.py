@@ -433,8 +433,14 @@ class Bee(pygame.sprite.Sprite):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
         if self.action is not Action.LOOKING and self.action is not Action.WAITING:
             if self.occupation is Occupation.ONLOOKER or self.occupation is Occupation.DANCER:
-                self.x += math.cos(self.orientation) * WALKING_SPEED
-                self.y += math.sin(self.orientation) * WALKING_SPEED
+                if self.action is Action.DANCE_RETURN:
+                    return_speed = interpolate(self.foodsource_sugar, MIN_SUGAR, MAX_SUGAR, WALKING_SPEED,
+                                               WALKING_SPEED * 2)
+                    self.x += math.cos(self.orientation) * return_speed
+                    self.y += math.sin(self.orientation) * return_speed
+                else:
+                    self.x += math.cos(self.orientation) * WALKING_SPEED
+                    self.y += math.sin(self.orientation) * WALKING_SPEED
             else:
                 self.x += math.cos(self.orientation) * self.speed / 100
                 self.y += math.sin(self.orientation) * self.speed / 100
