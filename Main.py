@@ -105,6 +105,12 @@ def main():
                 telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
             running = False
 
+        #if total_food_amount == sum([hive.food_count for hive in hive_group]):  # Simulation beenden wenn das komplette Futter gesammelt
+        #    if EXPORT_SIMULATION:
+        #        telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
+        #    running = False    
+
+        
         # Hintergrund zeichnen
         screen.fill(WHITE)
         simulation_screen.fill(GREY)

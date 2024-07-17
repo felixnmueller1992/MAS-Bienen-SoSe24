@@ -25,7 +25,7 @@ class Foodsource(pygame.sprite.Sprite):
             self.rect = None
             self.image = None
             self.units = args[0]  # Anzahl Futtereinheiten für diese Futterquelle
-            self.sugar = args[1]  # Anzahl Zucker für diese Futterquelle
+            self.sugar = args[1]  # Anzahl Zucker für diese Futterquelle            
             distance_to_hive = args[2]  
             hive_x = args[3]  
             hive_y = args[4]
@@ -72,7 +72,7 @@ class Foodsource(pygame.sprite.Sprite):
             retval = self.units  # Es wird nur das verbleibende Futter entnommen
         else:
             retval = x  # Maximales Futter wird entnommen
-        self.units = self.units - retval  # Futtermenge von Futterquelle abziehen
+        self.units = self.units - retval  # Futtermenge von Futterquelle abziehen        
         if self.units < 0:  # Negative Zahlen begrenzen
             self.units = 0
         return retval  # Tatsächlich gesammelte Futtermenge als Rückgabewert
