@@ -348,12 +348,12 @@ class Bee(pygame.sprite.Sprite):
                     self.deliver()  # Biene ist im Stock
             case Occupation.DANCER:
                 match self.action:
-                    case Action.DANCE_WAGGLE | Action.DANCE_RETURN:
+                    case Action.DANCE_WAGGLE:
                         self.dance_counter = self.dance_counter - 1
                         if self.dance_counter <= 0:
                             self.change_occupation(Occupation.EMPLOYED)
                             self.reset_dance_information()
-                    case Action.WAITING:
+                    case Action.WAITING | Action.DANCE_RETURN:
                         pass
                     case _:
                         print(f'O:Unbekannte Aktion {self.action} bei Occupation {self.occupation}.')
