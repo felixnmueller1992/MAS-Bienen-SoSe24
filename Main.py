@@ -143,7 +143,7 @@ def main():
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
 
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(FRAMES_PER_SECOND)
 
     pygame.quit()
 

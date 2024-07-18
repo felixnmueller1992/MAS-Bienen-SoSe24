@@ -45,7 +45,6 @@ class Hive(pygame.sprite.Sprite):
         match self.algorithm:
             case Algorithm.ABC:
                 self.bees.add([Bee(Occupation.SCOUT, self) for _ in range(BEES_SCOUT)])
-                self.bees.add([Bee(Occupation.EMPLOYED, self) for _ in range(BEES_EMPLOYED)])
                 self.bees.add([Bee(Occupation.ONLOOKER, self) for _ in range(BEES_ONLOOKER)])
                 return self.bees
             case Algorithm.BEE:
@@ -120,15 +119,10 @@ class Dancefloor(pygame.sprite.Sprite):
             bee.watchfloor = self
             return True
 
-    def remove_onlooker(self, bee):
-        self.onlookers.remove(bee)
-        bee.watchfloor = None
-        bee.action = Action.WANDERING
-        # bee.evaluate_dance()
-
     def clear_bees(self):
         for onlooker in self.onlookers:
-            self.remove_onlooker(onlooker)
+            onlooker.evaluate_dance()
+        self.onlookers.clear()
         self.dancer = None
 
     def update(self):

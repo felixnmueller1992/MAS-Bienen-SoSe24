@@ -50,7 +50,7 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
             case Occupation.DANCER:
                 total_dancer += 1
 
-    total_bees = BEES_SCOUT + BEES_EMPLOYED + BEES_ONLOOKER  # Aus Config Datei
+    total_bees = BEES_SCOUT + BEES_ONLOOKER  # Aus Config Datei
     legend_items = [
         ("Bienen gesamt:", str(total_bees), "", BLACK),
         ("Scout Biene:", str(total_scouts), str(round(total_scouts / total_bees * 100, 1)) + "%", COLOR_BEE_SCOUT),

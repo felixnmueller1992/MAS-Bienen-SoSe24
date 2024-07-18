@@ -4,6 +4,7 @@ import math
 
 from Config import *
 from Color import *
+from Util import *
 
 from enum import Enum
 
@@ -41,6 +42,7 @@ class Bee(pygame.sprite.Sprite):
 
         # Onlooker Attribute
         self.watchfloor = None
+        self.seen_dances = {}
 
         # Tänzer Attribute
         self.dance_counter = 0  # Counter wie lange die Biene tanzen darf
@@ -60,15 +62,22 @@ class Bee(pygame.sprite.Sprite):
             return False
         if len(self.hive.dance_bees) >= MAX_BEES_DANCER:
             return False
-        if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
-            self.dance_probability = 0.4
-        elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
-            self.dance_probability = 0.6
-        elif self.success == 3:
-            self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
 
-        if self.dance_probability >= random.random():
+        # Berechnung der Tanzwahrscheinlichkeit anhand des Zuckergehaltes
+        dance_prob = interpolate(self.foodsource_sugar, MIN_SUGAR, MAX_SUGAR, MIN_DANCE_PROBABILITY)
+
+        if dance_prob >= random.random():
             return True
+
+        # if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
+        #     self.dance_probability = 0.4
+        # elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
+        #     self.dance_probability = 0.6
+        # elif self.success == 3:
+        #     self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
+        #
+        # if self.dance_probability >= random.random():
+        #     return True
 
         return False
 
@@ -90,15 +99,18 @@ class Bee(pygame.sprite.Sprite):
 
     def reset_dance_information(self):
         self.dance_counter = 0
-        self.foodsource_pos = None
-        self.foodsource_sugar = 0
-        self.foodsource_units = 0
         if self.dancefloor is not None:
             self.dancefloor.clear_bees()
             self.hive.remove_dancefloor(self.dancefloor)
             self.dancefloor = None
             self.start_point = None
             self.end_point = None
+
+    def reset_foodsource_information(self):
+        self.foodsource_pos = None
+        self.foodsource_sugar = 0
+        self.foodsource_units = 0
+        self.foodsource = None
 
     # Methode zur Prüfung, ob ein Objekt im Sichtfeld der Biene liegt
     def bee_vision_collide(self, circle):
@@ -190,7 +202,7 @@ class Bee(pygame.sprite.Sprite):
             self.change_occupation(Occupation.DANCER)
             self.dancefloor = self.hive.create_dancefloor(self)
             if self.dancefloor:
-                self.dance(MAX_DANCE_COUNTER)
+                self.dance()
             else:
                 print(f'Konnte keine freie Tanzfläche finden.')
                 self.change_occupation(Occupation.EMPLOYED)
@@ -201,33 +213,62 @@ class Bee(pygame.sprite.Sprite):
         # Prüfen ob Biene Scout werden kann
         elif self.check_for_scout():
             self.change_occupation(Occupation.SCOUT)
-            self.orientation = random.uniform(0.0, 360.0)
-            self.reset_dance_information()
+            self.reset_foodsource_information()
         else:
             self.change_occupation(Occupation.ONLOOKER)
+            self.reset_foodsource_information()
 
-    def dance(self, time):
+    def dance(self):
         self.action = Action.DANCE_WAGGLE
-        self.dance_counter = time
+        distance = math.hypot(self.dancefloor.x - self.foodsource_pos[0], self.dancefloor.y - self.foodsource_pos[1])
+        self.dance_counter = distance * DANCETIME_PER_UNIT
         # Positionen für Tanz bestimmen
         dancefloor_vec = pygame.math.Vector2(self.dancefloor.rect.center)
-        foodsource_vec = pygame.math.Vector2(self.foodsource.x, self.foodsource.y) - dancefloor_vec
-        self.start_point = dancefloor_vec - foodsource_vec.normalize() * self.dancefloor.radius
-        self.end_point = dancefloor_vec + foodsource_vec.normalize() * self.dancefloor.radius
+        foodsource_vec = pygame.math.Vector2(self.foodsource.x, self.foodsource.y)
+        distance_vec = foodsource_vec - dancefloor_vec
+        self.start_point = dancefloor_vec - distance_vec.normalize() * self.dancefloor.radius
+        self.end_point = dancefloor_vec + distance_vec.normalize() * self.dancefloor.radius
         self.x = self.start_point.x
         self.y = self.start_point.y
 
     def evaluate_dance(self):
-        if random.random() > 0.99:
-            self.employ()
+        if self.watchfloor is None:
+            self.action = Action.WANDERING
+            return
 
-    def employ(self):
         dancer = self.watchfloor.dancer
-        self.foodsource_pos = dancer.foodsource_pos
-        self.foodsource_sugar = dancer.foodsource_sugar
-        self.foodsource_units = dancer.foodsource_units
-        self.foodsource = dancer.foodsource
-        self.watchfloor.remove_onlooker(self)
+        dance = {
+            'foodsource_pos': dancer.foodsource_pos,
+            'foodsource_sugar': dancer.foodsource_sugar,
+            'foodsource_units': dancer.foodsource_units,
+            'foodsource': dancer.foodsource
+        }
+        self.add_dance(dance)
+
+        total_dances = sum(d['count'] for d in self.seen_dances.values())
+        inter = interpolate(total_dances, MIN_DANCES_WATCHED, MAX_DANCES_WATCHED, 0.5)
+
+        if total_dances >= MIN_DANCES_WATCHED and inter > random.random():
+            most_seen = max(self.seen_dances.items(), key=lambda x: x[1]['count'])
+            top_dance = most_seen[1]['dance']
+            self.employ(top_dance)
+        else:
+            self.action = Action.WANDERING
+
+        self.watchfloor = None
+
+    def add_dance(self, dance):
+        foodsource_pos = tuple(dance['foodsource_pos'])
+        if foodsource_pos in self.seen_dances:
+            self.seen_dances[foodsource_pos]['count'] += 1
+        else:
+            self.seen_dances[foodsource_pos] = {'count': 1, 'dance': dance}
+
+    def employ(self, dance):
+        self.foodsource_pos = dance['foodsource_pos']
+        self.foodsource_sugar = dance['foodsource_sugar']
+        self.foodsource_units = dance['foodsource_units']
+        self.foodsource = dance['foodsource']
         self.change_occupation(Occupation.EMPLOYED)
 
     # Update Methoden - ab hier folgen alle Methoden, die mit dem Update zutun haben
@@ -280,7 +321,7 @@ class Bee(pygame.sprite.Sprite):
                             self.action = Action.SCOUTING
                             self.success = 0
                             self.steps = MAX_STEP_COUNTER_BEES - 150
-                            self.reset_dance_information()
+                            self.reset_foodsource_information()
                     case Action.SCOUTING:
                         self.update_occupation_scouting()
                     case Action.RETURNING:
@@ -290,11 +331,7 @@ class Bee(pygame.sprite.Sprite):
             case Occupation.ONLOOKER:
                 match self.action:
                     case Action.LOOKING:
-                        if self.watchfloor.dancer is not None:
-                            # TODO Onlooker muss hier noch Infos sammeln
-                            self.evaluate_dance()
-                        else:
-                            self.action = Action.WANDERING
+                        pass
                     case Action.WANDERING:
                         for dancefloor in self.hive.dancefloor_list:
                             if pygame.sprite.collide_circle(self, dancefloor):
@@ -311,12 +348,12 @@ class Bee(pygame.sprite.Sprite):
                     self.deliver()  # Biene ist im Stock
             case Occupation.DANCER:
                 match self.action:
-                    case Action.DANCE_WAGGLE | Action.DANCE_RETURN:
+                    case Action.DANCE_WAGGLE:
                         self.dance_counter = self.dance_counter - 1
                         if self.dance_counter <= 0:
-                            self.change_occupation(Occupation.ONLOOKER)
+                            self.change_occupation(Occupation.EMPLOYED)
                             self.reset_dance_information()
-                    case Action.WAITING:
+                    case Action.WAITING | Action.DANCE_RETURN:
                         pass
                     case _:
                         print(f'O:Unbekannte Aktion {self.action} bei Occupation {self.occupation}.')
@@ -396,8 +433,14 @@ class Bee(pygame.sprite.Sprite):
         # Fortbewegung: Position der Biene aktualisieren in Blickrichtung
         if self.action is not Action.LOOKING and self.action is not Action.WAITING:
             if self.occupation is Occupation.ONLOOKER or self.occupation is Occupation.DANCER:
-                self.x += math.cos(self.orientation) * WALKING_SPEED
-                self.y += math.sin(self.orientation) * WALKING_SPEED
+                if self.action is Action.DANCE_RETURN:
+                    return_speed = interpolate(self.foodsource_sugar, MIN_SUGAR, MAX_SUGAR, WALKING_SPEED,
+                                               WALKING_SPEED * 2)
+                    self.x += math.cos(self.orientation) * return_speed
+                    self.y += math.sin(self.orientation) * return_speed
+                else:
+                    self.x += math.cos(self.orientation) * WALKING_SPEED
+                    self.y += math.sin(self.orientation) * WALKING_SPEED
             else:
                 self.x += math.cos(self.orientation) * self.speed / 100
                 self.y += math.sin(self.orientation) * self.speed / 100
