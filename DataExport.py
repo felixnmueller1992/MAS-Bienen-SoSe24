@@ -31,6 +31,7 @@ def daten_exportieren(hive_group, bee_group, total_food_amount):
             bee_data_temp = {
                 "bee_"+str(id)+"_occupation": [str(bee.occupation).split('.')[1]],
                 "bee_"+str(id)+"_capacity": [bee.capacity],
+                "bee_"+str(id)+"_foodsource_pos": [bee.foodsource_pos],
                 "bee_"+str(id)+"_success": [bee.success]
             }                                                       
             telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_data_temp)],axis=1)          
