@@ -45,8 +45,6 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
                 total_employed += 1
             case Occupation.ONLOOKER:
                 total_onlooker += 1
-            case Occupation.RETURNING:
-                total_returner += 1
             case Occupation.DANCER:
                 total_dancer += 1
 
@@ -58,8 +56,6 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
          COLOR_BEE_EMPLOYED),
         ("Onlooker Biene:", str(total_onlooker), str(round(total_onlooker / total_bees * 100, 1)) + "%",
          COLOR_BEE_ONLOOKER),
-        ("Biene kehrt zurück:", str(total_returner), str(round(total_returner / total_bees * 100, 1)) + "%",
-            DARK_GREEN),
         ("Biene tanzt:", str(total_dancer), str(round(total_dancer / total_bees * 100, 1)) + "%", COLOR_BEE_DANCER)
     ]
 

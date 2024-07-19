@@ -25,14 +25,13 @@ def daten_exportieren(hive_group, bee_group, total_food_amount):
                 total_employed += 1
             case Occupation.ONLOOKER:
                 total_onlooker += 1
-            case Occupation.RETURNING:
-                total_returner += 1
             case Occupation.DANCER:
                 total_dancer += 1
         if EXPORT_COMPLETE_BEE_GROUP == True:
             bee_data_temp = {
                 "bee_"+str(id)+"_occupation": [str(bee.occupation).split('.')[1]],
                 "bee_"+str(id)+"_capacity": [bee.capacity],
+                "bee_"+str(id)+"_foodsource_pos": [bee.foodsource_pos],
                 "bee_"+str(id)+"_success": [bee.success]
             }                                                       
             telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_data_temp)],axis=1)          
@@ -40,7 +39,6 @@ def daten_exportieren(hive_group, bee_group, total_food_amount):
             "total_scouts": [total_scouts],
             "total_employed": [total_employed],
             "total_onlooker": [total_onlooker],
-            "total_returner": [total_returner],
             "total_dancer": [total_dancer]
     }
     telemetry_df_temp = pd.concat([telemetry_df_temp,pd.DataFrame(bee_population_data)],axis=1)
