@@ -7,6 +7,7 @@ from Hive import Hive
 from Legende import *
 from Szenario import *
 from DataExport import *
+from Util import *
 
 file_date = time.strftime("%Y%m%d_%H%M%S")
 
@@ -80,6 +81,11 @@ def main():
             environment_data = ["Foodsource", foodsource.units, foodsource.sugar, foodsource.x, foodsource.y]
             export_szenario(environment_data, file_date)
 
+    # Erstelle DF für Config-Werte für den Simulatioins Export
+    if EXPORT_SIMULATION:
+        config_df = collect_config_data()
+        config_df.to_excel(file_date + "_Simulationsdaten.xlsx", sheet_name="Config-Daten", index=False)
+        
     # Timer-Setup für Dateiexport/Plot
     export_data_event = pygame.USEREVENT + 1
     pygame.time.set_timer(export_data_event, EXPORT_DATA_INTERVALL)
@@ -97,12 +103,16 @@ def main():
 
             if event.type == pygame.QUIT:
                 if EXPORT_SIMULATION:
-                    telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
+                    with pd.ExcelWriter(file_date + "_Simulationsdaten.xlsx", engine='openpyxl') as writer:
+                        telemetry_df.to_excel(writer, sheet_name="Simulationsdaten", index=False)
+                        config_df.to_excel(writer, sheet_name="Config-Daten", index=False, header=False)
                 running = False
 
         if pygame.time.get_ticks() > MAX_TIME:  # Simulation nach abgelaufener Zeit beenden
             if EXPORT_SIMULATION:
-                telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
+                with pd.ExcelWriter(file_date + "_Simulationsdaten.xlsx", engine='openpyxl') as writer:
+                        telemetry_df.to_excel(writer, sheet_name="Simulationsdaten", index=False)
+                        config_df.to_excel(writer, sheet_name="Config-Daten", index=False, header=False)
             running = False
 
         #if total_food_amount == sum([hive.food_count for hive in hive_group]):  # Simulation beenden wenn das komplette Futter gesammelt
