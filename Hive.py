@@ -3,23 +3,22 @@ import random
 
 import pygame
 
-from enum import Enum
+from Algorithm import Algorithm
+from Bee import Bee, Occupation
 from Color import *
 from Config import *
-
-from Bee import Bee, Occupation, Action
 
 
 # Klasse Bienenstock
 class Hive(pygame.sprite.Sprite):
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, algorithm='SUGAR'):
         super().__init__()
         self.x = x
         self.y = y
         self.food_count = 0
 
-        self.algorithm = Algorithm.ABC
+        self.algorithm = Algorithm[algorithm]
 
         self.size = 100
         self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
@@ -43,14 +42,18 @@ class Hive(pygame.sprite.Sprite):
     # Bienen werden nach Ratio erzeugt mit jeweiliger Occupation
     def create_bees(self):
         match self.algorithm:
-            case Algorithm.ABC:
+            case Algorithm.SUGAR:
                 self.bees.add([Bee(Occupation.SCOUT, self) for _ in range(BEES_SCOUT)])
                 self.bees.add([Bee(Occupation.ONLOOKER, self) for _ in range(BEES_ONLOOKER)])
                 return self.bees
-            case Algorithm.BEE:
-                pass
+            case Algorithm.REPETITION:
+                self.bees.add([Bee(Occupation.SCOUT, self) for _ in range(BEES_SCOUT)])
+                self.bees.add([Bee(Occupation.ONLOOKER, self) for _ in range(BEES_ONLOOKER)])
+                return self.bees
             case Algorithm.NONE:
-                pass
+                self.bees.add([Bee(Occupation.SCOUT, self) for _ in range(BEES_SCOUT)])
+                self.bees.add([Bee(Occupation.SCOUT, self) for _ in range(BEES_ONLOOKER)])
+                return self.bees
 
     # Nahrung wird an Bienenstock übergeben
     def deposit(self, food_amount, sugar_amount):
@@ -127,10 +130,3 @@ class Dancefloor(pygame.sprite.Sprite):
 
     def update(self):
         pass
-
-
-# Enum für Algorithmus
-class Algorithm(Enum):
-    ABC = 1
-    BEE = 2
-    NONE = 3
