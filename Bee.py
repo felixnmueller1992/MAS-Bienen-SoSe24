@@ -2,9 +2,9 @@ import pygame
 import random
 import math
 
-from Config import *
 from Color import *
 from Util import *
+from Algorithm import Algorithm
 
 from enum import Enum
 
@@ -63,21 +63,26 @@ class Bee(pygame.sprite.Sprite):
         if len(self.hive.dance_bees) >= MAX_BEES_DANCER:
             return False
 
-        # Berechnung der Tanzwahrscheinlichkeit anhand des Zuckergehaltes
-        dance_prob = interpolate(self.foodsource_sugar, MIN_SUGAR, MAX_SUGAR, MIN_DANCE_PROBABILITY)
+        if self.hive.algorithm is Algorithm.SUGAR:
+            # Berechnung der Tanzwahrscheinlichkeit anhand des Zuckergehaltes
+            dance_prob = interpolate(self.foodsource_sugar, MIN_SUGAR, MAX_SUGAR, MIN_DANCE_PROBABILITY)
+            if dance_prob >= random.random():
+                return True
+        elif self.hive.algorithm is Algorithm.REPETITION:
+            if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
+                self.dance_probability = 0.4
+            elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
+                self.dance_probability = 0.6
+            elif self.success == 3:
+                self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
 
-        if dance_prob >= random.random():
-            return True
-
-        # if self.success == 1:  # Biene war an Futterquelle erstes Mal erfolgreich
-        #     self.dance_probability = 0.4
-        # elif self.success == 2:  # Biene war an Futterquelle zweites Mal erfolgreich
-        #     self.dance_probability = 0.6
-        # elif self.success == 3:
-        #     self.dance_probability = 0.8  # Biene war an Futterquelle drittes Mal
-        #
-        # if self.dance_probability >= random.random():
-        #     return True
+            if self.dance_probability >= random.random():
+                return True
+        elif self.hive.algorithm is Algorithm.NONE:
+            return False
+        else:
+            print(f'Unbekannter Algorithmus im Hive: {self.hive.algorithm}')
+            return False
 
         return False
 
@@ -87,6 +92,9 @@ class Bee(pygame.sprite.Sprite):
         return False
 
     def check_for_scout(self):
+        if self.hive.algorithm is Algorithm.NONE:
+            return True
+
         if len(self.hive.bees) > 0:
             # Anzahl der maximalen Scouts wird in Abhängigkeit der Anzahl Dancer angepasst (je weniger Dancer,
             # desto mehr Scouts)
@@ -186,7 +194,7 @@ class Bee(pygame.sprite.Sprite):
         self.foodsource = food
         if self.capacity >= BEE_MAX_CAPACITY:
             self.capacity = BEE_MAX_CAPACITY  # Futtermenge begrenzen
-        if self.capacity > 0:    
+        if self.capacity > 0:
             self.action = Action.RETURNING
             self.speed = self.speed - REDUCE_SPEED_WHEN_CARRY  # Geschwindigkeit reduzieren, wenn Biene Futter trägt
 
