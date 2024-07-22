@@ -23,11 +23,9 @@ def main():
     pygame.display.set_caption("Bienenstock Simulation")
     clock = pygame.time.Clock()
 
-    #load button images
-    Minus_img = pygame.image.load('Minus_Button.png').convert_alpha()
-    Plus_img = pygame.image.load('Plus_Button.png').convert_alpha()
+    Minus_img = pygame.image.load('resources/images/Minus_Button.png').convert_alpha()
+    Plus_img = pygame.image.load('resources/images/Plus_Button.png').convert_alpha()
 
-    #create button instances
     Minus_button = Button(50, 750, Minus_img, 0.4)
     Plus_button = Button(150, 750, Plus_img, 0.4)
     FRAMES_PER_SECOND_var = FRAMES_PER_SECOND
