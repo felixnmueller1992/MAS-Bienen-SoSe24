@@ -10,7 +10,7 @@ BEES_SCOUT = 60  # Anzahl Scout Bienen im System zum Start
 BEES_ONLOOKER = 160  # Anzahl Onlooker Bienen im System zum Start
 MAX_BEES_SCOUT = (BEES_SCOUT + BEES_ONLOOKER) * 0.4  # Anzahl maximale Scout Bienen im System
 MAX_BEES_DANCER = 15  # Anzahl maximale tanzende Bienen
-FOOD_COUNT = 15  # Anzahl Futterquellen im System
+FOOD_COUNT = 20  # Anzahl Futterquellen im System
 MAX_SUGAR = 7  # Maximale Anzahl Zuckereinheiten pro Futterquelle
 MIN_SUGAR = 1  # Minimale Anzahl an Zuckereinheiten pro Futterquelle
 MAX_UNITS = 75  # Maximale Futterkapazität einer Futterquelle
@@ -34,12 +34,12 @@ DANCEFLOOR_CAPACITY = 5  # Maximale Anzahl von Bienen die gleichzeitig zuschauen
 MIN_DANCE_PROBABILITY = 0.05  # Minimale Wahrscheinlichkeit mit der eine Biene für eine Quelle tanzt
 
 # Parameter Onlooker
-MAX_DANCES_WATCHED = 8  # Anzahl der Tänze die ein Onlooker maximal schaut
-MIN_DANCES_WATCHED = 5  # Anzahl der Tänze die ein Onlooker mindestens schaut
+MAX_DANCES_WATCHED = 3  # Anzahl der Tänze die ein Onlooker maximal schaut
+MIN_DANCES_WATCHED = 1  # Anzahl der Tänze die ein Onlooker mindestens schaut
 
 # Testing
 EXPORT_ENVIRONMENT = False
-IMPORT_ENVIRONMENT_FILE = ""
+IMPORT_ENVIRONMENT_FILE = "resources/input/02_Zwei_Hives_Test.csv"
 
 EXPORT_SIMULATION = False
 EXPORT_COMPLETE_BEE_GROUP = False
