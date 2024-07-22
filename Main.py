@@ -8,6 +8,7 @@ from Legende import *
 from Szenario import *
 from DataExport import *
 from Util import *
+from Button import Button
 
 file_date = time.strftime("%Y%m%d_%H%M%S")
 
@@ -21,6 +22,13 @@ def main():
 
     pygame.display.set_caption("Bienenstock Simulation")
     clock = pygame.time.Clock()
+
+    minus_img = pygame.image.load('resources/images/Minus_Button.png').convert_alpha()
+    plus_img = pygame.image.load('resources/images/Plus_Button.png').convert_alpha()
+
+    minus_button = Button(50, 750, minus_img, 0.4)
+    plus_button = Button(150, 750, plus_img, 0.4)
+    frames_per_second_var = FRAMES_PER_SECOND
 
     # Initialisiere alle Objekte für Simulation
 
@@ -148,13 +156,20 @@ def main():
 
         # Legende auf die Map zeichnen
         dance_algorithm = hive.algorithm
-        legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_algorithm)
+        legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_algorithm, frames_per_second_var)
 
         # Simulation auf den darunterliegenden Screen zeichnen
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
 
+        # Buttons zeichnen
+        if minus_button.draw(screen):
+            frames_per_second_var = frames_per_second_var - 10
+            
+        if plus_button.draw(screen):
+            frames_per_second_var = frames_per_second_var + 10
+
         pygame.display.flip()
-        clock.tick(FRAMES_PER_SECOND)
+        clock.tick(frames_per_second_var)
 
     pygame.quit()
 
