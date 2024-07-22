@@ -28,10 +28,10 @@ def main():
         hive_group = pygame.sprite.Group()
         foodsource_group = pygame.sprite.Group()
 
-        df_import = pd.read_csv(IMPORT_ENVIRONMENT_FILE, names=['Object', 'Units', 'Sugar', 'X_cord', 'Y_cord'])
+        df_import = pd.read_csv(IMPORT_ENVIRONMENT_FILE, names=['Object', 'Units', 'Sugar', 'X_cord', 'Y_cord', 'Algorithm'])
         for index, row in df_import.iterrows():
             if row['Object'] == "Hive":
-                hive = Hive(row['X_cord'], row['Y_cord'])
+                hive = Hive(row['X_cord'], row['Y_cord'], row['Algorithm'])
                 hive_group.add(hive)
 
             if row['Object'] == "Foodsource":
@@ -74,7 +74,7 @@ def main():
     if EXPORT_ENVIRONMENT:
 
         for hive in hive_group:
-            environment_data = ["Hive", "N/A", "N/A", hive.x, hive.y]
+            environment_data = ["Hive", "N/A", "N/A", hive.x, hive.y, str(hive.algorithm).split('.')[1]]
             export_szenario(environment_data, file_date)
 
         for foodsource in foodsource_group:
@@ -147,7 +147,8 @@ def main():
         bee_group.update(foodsource_group)
 
         # Legende auf die Map zeichnen
-        legende_zeichnen(screen, hive_group, bee_group, total_food_amount)
+        dance_algorithm = hive.algorithm
+        legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_algorithm)
 
         # Simulation auf den darunterliegenden Screen zeichnen
         screen.blit(simulation_screen, (SCREEN_WIDTH - SIMULATION_WIDTH, 0))
