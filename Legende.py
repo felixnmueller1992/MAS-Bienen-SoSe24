@@ -5,7 +5,7 @@ from Config import *
 from Bee import Occupation
 
 
-def legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_algorithm):
+def legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_algorithm, FRAMES_PER_SECOND_var):
     # Schriftart für Labels
     label_font = pygame.font.SysFont("Arial", 16)
     header_font = pygame.font.SysFont("Arial", 20, bold=True)
@@ -71,4 +71,8 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_alg
 
         y_offset += 30
 
+    color_surface = label_font.render("FPS", True, BLACK)
+    screen.blit(color_surface, (110, 725))
+    color_surface = label_font.render(str(FRAMES_PER_SECOND_var), True, BLACK)
+    screen.blit(color_surface, (110, 760))
 
