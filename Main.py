@@ -8,7 +8,7 @@ from Legende import *
 from Szenario import *
 from DataExport import *
 from Util import *
-from button import Button
+from Button import Button
 
 file_date = time.strftime("%Y%m%d_%H%M%S")
 
