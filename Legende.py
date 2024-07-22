@@ -5,7 +5,7 @@ from Config import *
 from Bee import Occupation
 
 
-def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
+def legende_zeichnen(screen, hive_group, bee_group, total_food_amount, dance_algorithm):
     # Schriftart für Labels
     label_font = pygame.font.SysFont("Arial", 16)
     header_font = pygame.font.SysFont("Arial", 20, bold=True)
@@ -50,6 +50,7 @@ def legende_zeichnen(screen, hive_group, bee_group, total_food_amount):
 
     total_bees = BEES_SCOUT + BEES_ONLOOKER  # Aus Config Datei
     legend_items = [
+        ("Bienen Tanzverhalten:", str(dance_algorithm).split('.')[1], "", BLACK),
         ("Bienen gesamt:", str(total_bees), "", BLACK),
         ("Scout Biene:", str(total_scouts), str(round(total_scouts / total_bees * 100, 1)) + "%", COLOR_BEE_SCOUT),
         ("Employed Biene: ", str(total_employed), str(round(total_employed / total_bees * 100, 1)) + "%",
