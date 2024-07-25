@@ -62,6 +62,8 @@ class Bee(pygame.sprite.Sprite):
             return False
         if len(self.hive.dance_bees) >= MAX_BEES_DANCER:
             return False
+        if self.foodsource_pos is None or self.foodsource is None:
+            return False
 
         if self.hive.algorithm is Algorithm.SUGAR:
             # Berechnung der Tanzwahrscheinlichkeit anhand des Zuckergehaltes
