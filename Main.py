@@ -123,10 +123,12 @@ def main():
                         config_df.to_excel(writer, sheet_name="Config-Daten", index=False, header=False)
             running = False
 
-        #if total_food_amount == sum([hive.food_count for hive in hive_group]):  # Simulation beenden wenn das komplette Futter gesammelt
-        #    if EXPORT_SIMULATION:
-        #        telemetry_df.to_excel(file_date + "_Simulationsdaten.xlsx", index=False)
-        #    running = False    
+        if total_food_amount == sum([hive.food_count for hive in hive_group]):  # Simulation beenden wenn das komplette Futter gesammelt
+            if EXPORT_SIMULATION:
+                with pd.ExcelWriter(file_date + "_Simulationsdaten.xlsx", engine='openpyxl') as writer:
+                        telemetry_df.to_excel(writer, sheet_name="Simulationsdaten", index=False)
+                        config_df.to_excel(writer, sheet_name="Config-Daten", index=False, header=False)
+            running = False    
 
         
         # Hintergrund zeichnen
